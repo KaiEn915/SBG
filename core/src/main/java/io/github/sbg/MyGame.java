@@ -21,11 +21,19 @@ public class MyGame extends Game {
     public void create() {
         skin=new Skin(Gdx.files.internal("craftacular-ui.json"));
 
-        // asset manager
+        // loading asset manager
         assetManager = new AssetManager();
+            // other textures
         assetManager.load("burgerTable.png", Texture.class);
         assetManager.load("missingTexture.png", Texture.class);
+        assetManager.load("chatBubble.png", Texture.class);
+            // ingredient textures
+
+            // character textures
+        assetManager.load("characters/swagSteve.png",Texture.class);
+            //
         assetManager.finishLoading();
+        //
 
         // load and initialize systems
         ingredientSystem=new IngredientSystem(assetManager);
