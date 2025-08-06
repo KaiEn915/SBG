@@ -23,7 +23,7 @@ public class MainMenuScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(stage);
 
         // Use LibGDX built-in skin
-        skin = new Skin(Gdx.files.internal("uiskin.json")); // make sure uiskin.atlas and uiskin.json are in assets
+        skin = new Skin(Gdx.files.internal("craftacular-ui.json")); // make sure uiskin.atlas and craftacular-ui.json are in assets
 
         Table table = new Table();
         table.setFillParent(true);
@@ -34,7 +34,7 @@ public class MainMenuScreen extends ScreenAdapter {
         TextButton settingsButton = new TextButton("Settings", skin);
         TextButton quitButton = new TextButton("Quit", skin);
 
-        table.add(playButton).fillX().uniformX().uniformY().pad(10).width(400).height(200);
+        table.add(playButton).fillX().uniformX().uniformY().pad(10).width(400).height(100);
         table.row();
         table.add(settingsButton).fillX().fillY().uniformX().uniformY().pad(10);
         table.row();
