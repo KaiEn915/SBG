@@ -23,7 +23,7 @@ public class MainMenuScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(stage);
 
         // Use LibGDX built-in skin
-        skin = new Skin(Gdx.files.internal("craftacular-ui.json")); // make sure uiskin.atlas and craftacular-ui.json are in assets
+        skin =  game.skin;// make sure uiskin.atlas and craftacular-ui.json are in assets
 
         Table table = new Table();
         table.setFillParent(true);
@@ -44,7 +44,7 @@ public class MainMenuScreen extends ScreenAdapter {
         playButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 System.out.println("Start Game!");
-                // game.setScreen(new GameScreen(game));
+                game.setScreen(new GameScreen(game));
             }
             return false;
         });
