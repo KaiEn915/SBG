@@ -13,14 +13,20 @@ import io.github.sbg.models.Ingredient;
 import io.github.sbg.models.IngredientRarity;
 
 public class PlayerDataSystem {
-    public static final PlayerDataSystem instance = new PlayerDataSystem();
-
     private Set<Integer> unlockedIngredients = new HashSet<>();
     private Map<Integer, IngredientRarity> ingredientRarities = new HashMap<>();
     private float gamePoints;
 
+    public PlayerDataSystem(){
+        loadData();
+    }
+
     public IngredientRarity getIngredientRarity(int ingredientID) {
         return ingredientRarities.getOrDefault(ingredientID, IngredientRarity.COMMON);
+    }
+
+    public Set<Integer> getUnlockedIngredients() {
+        return unlockedIngredients;
     }
 
     public float getGamePoints() {

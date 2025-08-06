@@ -7,20 +7,30 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import io.github.sbg.screens.MainMenuScreen;
+import io.github.sbg.systems.IngredientSystem;
+import io.github.sbg.systems.OrderSystem;
 import io.github.sbg.systems.PlayerDataSystem;
 
 public class MyGame extends Game {
+    public IngredientSystem ingredientSystem;
+    public PlayerDataSystem playerDataSystem;
     public AssetManager assetManager;
     public Skin skin;
 
     @Override
     public void create() {
         skin=new Skin(Gdx.files.internal("craftacular-ui.json"));
-        PlayerDataSystem.instance.loadData();
+
+        // asset manager
         assetManager = new AssetManager();
         assetManager.load("burgerTable.png", Texture.class);
-
+        assetManager.load("missingTexture.png", Texture.class);
         assetManager.finishLoading();
+
+        // load and initialize systems
+        ingredientSystem=new IngredientSystem(assetManager);
+        playerDataSystem=new PlayerDataSystem(); // player data will be loaded inside its constructor
+
         this.setScreen(new MainMenuScreen(this));
     }
 

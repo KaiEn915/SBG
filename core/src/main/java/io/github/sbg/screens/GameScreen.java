@@ -10,14 +10,19 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import io.github.sbg.MyGame;
+import io.github.sbg.systems.IngredientSystem;
+import io.github.sbg.systems.OrderSystem;
 
 public class GameScreen implements Screen {
     private MyGame game;
     private Stage stage;
     private Skin skin;
 
+    private OrderSystem orderSystem;
+
     public GameScreen(MyGame game) {
         this.game = game;
+        orderSystem=new OrderSystem(game.playerDataSystem,game.ingredientSystem);
     }
 
     @Override
@@ -67,6 +72,9 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
+
+        //
+        orderSystem.update(delta);
     }
 
     @Override
