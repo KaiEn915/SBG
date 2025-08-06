@@ -1,5 +1,7 @@
 package io.github.sbg.systems;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 
 import java.util.*;
@@ -8,22 +10,41 @@ import java.util.stream.Collectors;
 
 import io.github.sbg.models.Ingredient;
 import io.github.sbg.models.Order;
+import io.github.sbg.screens.GameScreen;
 
 public class OrderSystem {
     private final Random random = new Random();
     private final PlayerDataSystem playerDataSystem;
     private final IngredientSystem ingredientSystem;
+    private final GameScreen gameScreen;
     private List<Order> pendingOrders=new ArrayList<>();
-    private float orderInterval=10,nextOrder=0;
+    private List<String> characterTexturePaths=new ArrayList<>();
+    private float orderInterval=10,nextOrder=5;
     private final int MAXIMUM_ORDER_AMOUNT=5;
 
-    public OrderSystem(PlayerDataSystem playerDataSystem, IngredientSystem ingredientSystem) {
+    public OrderSystem(PlayerDataSystem playerDataSystem, IngredientSystem ingredientSystem,GameScreen gameScreen) {
         this.playerDataSystem = playerDataSystem;
         this.ingredientSystem = ingredientSystem;
+        this.gameScreen=gameScreen;
+        loadCharacterTexturePaths();
+    }
+    public void loadCharacterTexturePaths() {
+        FileHandle directory = Gdx.files.internal("assets/characters");
+        if (directory.isDirectory()) {
+            for (FileHandle entry : directory.list()) {
+                characterTexturePaths.add("characters/"+entry.name());
+            }
+        }
+
     }
 
-    public Order generateRandomOrder() {
+
+
+    public Order getRandomGeneratedOrder() {
         List<Integer> order = new ArrayList<>(); // order means the ingredients in the order (use ingredient id)
+        // decide customer character texture
+        String characterTexturePath=characterTexturePaths.get(random.nextInt(characterTexturePaths.size()));
+
 
         order.add(0); // 0 is bun bottom
 
@@ -45,7 +66,7 @@ public class OrderSystem {
 
         System.out.println("New order generated!\n");
         System.out.println(new Json().prettyPrint(order));
-        return new Order(order);
+        return new Order(order,characterTexturePath);
     }
     public void update(float delta) {
         for (Order order : pendingOrders) {
@@ -56,10 +77,16 @@ public class OrderSystem {
 
         nextOrder-=delta;
         if (pendingOrders.size() < MAXIMUM_ORDER_AMOUNT && nextOrder <= 0) {
-            pendingOrders.add(generateRandomOrder());
+            generateOrder();
             nextOrder = orderInterval;
         }
     }
+    public void generateOrder(){
+        Order generatedOrder=getRandomGeneratedOrder();
+        pendingOrders.add(generatedOrder);
+        gameScreen.spawnCustomer(generatedOrder);
+    }
+
 
 }
 

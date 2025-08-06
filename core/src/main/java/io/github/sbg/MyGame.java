@@ -2,6 +2,7 @@ package io.github.sbg;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -24,18 +25,12 @@ public class MyGame extends Game {
         // loading asset manager
         assetManager = new AssetManager();
             // ui textures
-        assetManager.load("ui/burgerTable.png", Texture.class);
-        assetManager.load("ui/missingTexture.png", Texture.class);
-        assetManager.load("ui/chatBubble.png", Texture.class);
-        assetManager.load("ui/background.png", Texture.class);
-            // ingredient texturess
-
+        loadAssetTextures("ui");
+            // ingredient textures
+//        loadAssetTextures("ingredients");
             // character textures
-        assetManager.load("characters/swagSteve.png",Texture.class);
-        assetManager.load("characters/playingAlex.png",Texture.class);
-        assetManager.load("characters/enderman.png",Texture.class);
-        assetManager.load("characters/zombie.png",Texture.class);
-        assetManager.load("characters/skeleton.png",Texture.class);
+        loadAssetTextures("characters");
+
             //
         assetManager.finishLoading();
         //
@@ -45,6 +40,14 @@ public class MyGame extends Game {
         playerDataSystem=new PlayerDataSystem(); // player data will be loaded inside its constructor
 
         this.setScreen(new MainMenuScreen(this));
+    }
+    public void loadAssetTextures(String assetDirectoryPath){
+        FileHandle directory = Gdx.files.internal("assets/"+assetDirectoryPath);
+        if (directory.isDirectory()) {
+            for (FileHandle entry : directory.list()) {
+                assetManager.load(assetDirectoryPath+"/"+entry.name(),Texture.class);
+            }
+        }
     }
 
     @Override

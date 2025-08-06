@@ -5,15 +5,20 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import javax.swing.GroupLayout;
 
 import io.github.sbg.MyGame;
+import io.github.sbg.models.Order;
 import io.github.sbg.systems.IngredientSystem;
 import io.github.sbg.systems.OrderSystem;
 
@@ -23,10 +28,13 @@ public class GameScreen implements Screen {
     private Skin skin;
 
     private OrderSystem orderSystem;
+    private Table rootTable;
+    private Group customerGroup;
+    private Random random=new Random();
 
     public GameScreen(MyGame game) {
         this.game = game;
-        orderSystem = new OrderSystem(game.playerDataSystem, game.ingredientSystem);
+        orderSystem = new OrderSystem(game.playerDataSystem, game.ingredientSystem,this);
     }
 
     @Override
@@ -36,8 +44,10 @@ public class GameScreen implements Screen {
 
         skin = game.skin; // Or VisUI skin
 
-        Table rootTable = new Table();
+        rootTable = new Table();
         rootTable.setFillParent(true);
+
+        customerGroup=new Group();
 
         // ======= Top Bar =======
         TextButton pauseButton = new TextButton("Pause", skin);
@@ -47,43 +57,6 @@ public class GameScreen implements Screen {
         topBar.add(pauseButton).left().expandX().pad(10);
         topBar.add(scoreLabel).right().expandX().pad(10);
 
-        // === Customer Group ===
-        Group customerGroup = new Group();
-
-        // --- Customer Image ---
-        Texture customerTexture = game.assetManager.get("characters/enderman.png", Texture.class);
-        Image customerImage = new Image(customerTexture);
-        customerImage.setSize(300, 300); // Fixed size
-        customerImage.setPosition(0, 0); // Base reference point
-
-        // --- Chat Bubble Background ---
-        Texture chatBubbleTexture = game.assetManager.get("ui/chatBubble.png", Texture.class);
-        Image chatBubbleImage = new Image(chatBubbleTexture);
-        chatBubbleImage.setSize(150, 100); // Smaller and cleaner
-        // Position above the top-right corner of customerImage
-        chatBubbleImage.setPosition(
-            customerImage.getX() + customerImage.getWidth() - chatBubbleImage.getWidth() * 0.8f,
-            customerImage.getY() + customerImage.getHeight() - 20
-        );
-
-        // --- Burger Image inside the chat bubble ---
-        Texture burgerOrderTexture = game.assetManager.get("ui/missingTexture.png", Texture.class); // Representing burger
-        Image burgerOrderImage = new Image(burgerOrderTexture);
-        burgerOrderImage.setSize(60, 60); // Make it fit inside chat bubble
-        // Center inside the chat bubble
-        burgerOrderImage.setPosition(
-            chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerOrderImage.getWidth()) / 2f,
-            chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerOrderImage.getHeight()) / 2f
-        );
-
-        // === Add all to group ===
-        customerGroup.addActor(customerImage);
-        customerGroup.addActor(chatBubbleImage);
-        customerGroup.addActor(burgerOrderImage);
-
-        // (Optional) Place the entire group on screen
-        customerGroup.setPosition(500, 100); // Example: place near bottom-middle
-        stage.addActor(customerGroup);
 
         // ======= Center Burger Table =======
         Texture burgerTableTexture = game.assetManager.get("ui/burgerTable.png", Texture.class);
@@ -111,6 +84,54 @@ public class GameScreen implements Screen {
         rootTable.add(ingredientTable).bottom().padBottom(20);
         stage.addActor(backgroundImage);
         stage.addActor(rootTable);
+    }
+
+    public void spawnCustomer(Order order){
+        // === Customer Group ===
+        Group customerGroup = new Group();
+
+        // --- Customer Image ---
+        Texture customerTexture = game.assetManager.get(order.getCharacterTexturePath(), Texture.class);
+        Image customerImage = new Image(customerTexture);
+        customerImage.setSize(300, 300); // Fixed size
+        customerImage.setPosition(0, 0); // Base reference point
+
+        // --- Chat Bubble Background ---
+        Texture chatBubbleTexture = game.assetManager.get("ui/chatBubble.png", Texture.class);
+        Image chatBubbleImage = new Image(chatBubbleTexture);
+        chatBubbleImage.setSize(150, 100);
+
+        // Position above the top-right corner of customerImage
+        chatBubbleImage.setPosition(
+            customerImage.getX() + customerImage.getWidth() - chatBubbleImage.getWidth() * 0.8f,
+            customerImage.getY() + customerImage.getHeight() - 20
+        );
+
+        // --- Burger Image inside the chat bubble ---
+        Texture burgerOrderTexture = game.assetManager.get("ui/missingTexture.png", Texture.class); // Representing burger
+        Image burgerOrderImage = new Image(burgerOrderTexture);
+        burgerOrderImage.setSize(60, 60); // Make it fit inside chat bubble
+        // Center inside the chat bubble
+        burgerOrderImage.setPosition(
+            chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerOrderImage.getWidth()) / 2f,
+            chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerOrderImage.getHeight()) / 2f
+        );
+
+        // === Add all to group ===
+        customerGroup.addActor(customerImage);
+        customerGroup.addActor(chatBubbleImage);
+        customerGroup.addActor(burgerOrderImage);
+
+        float screenWidth = stage.getViewport().getWorldWidth();
+        float minX = -700;
+        float maxX = screenWidth - 300 - customerImage.getWidth();
+        float randomX = minX + random.nextFloat() * (maxX - minX);
+        customerGroup.setPosition(randomX, 0);
+        if (MathUtils.randomBoolean()) {
+            customerGroup.setScaleX(-1f);
+            customerGroup.setPosition(randomX + customerGroup.getWidth(), 0);
+        }
+        this.customerGroup.addActor(customerGroup);
     }
 
     @Override
