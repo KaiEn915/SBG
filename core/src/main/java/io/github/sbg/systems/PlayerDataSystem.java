@@ -54,9 +54,6 @@ public class PlayerDataSystem {
 
         Json json = new Json();
 
-        unlockIngredient(1);
-        unlockIngredient(2);
-
         FileHandle file = Gdx.files.local("playerData.json");
         file.writeString(json.prettyPrint(this), false);
     }

@@ -21,9 +21,9 @@ public class IngredientSystem {
     }
 
     private void loadIngredients() {
-        addIngredient(0, "Bun Bottom", 5, "missingTexture.png");
-        addIngredient(1, "Bun Top", 5, "missingTexture.png");
-        addIngredient(2, "Tomato", 10, "missingTexture.png");
+        addIngredient(0, "Bun Bottom", 5, "ui/missingTexture.png");
+        addIngredient(1, "Bun Top", 5, "ui/missingTexture.png");
+        addIngredient(2, "Tomato", 10, "ui/missingTexture.png");
     }
 
     private void addIngredient(int id, String name, float baseValue, String texturePath) {

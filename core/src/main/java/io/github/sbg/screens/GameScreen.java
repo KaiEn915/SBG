@@ -38,7 +38,6 @@ public class GameScreen implements Screen {
 
         Table rootTable = new Table();
         rootTable.setFillParent(true);
-        stage.addActor(rootTable);
 
         // ======= Top Bar =======
         TextButton pauseButton = new TextButton("Pause", skin);
@@ -52,13 +51,13 @@ public class GameScreen implements Screen {
         Group customerGroup = new Group();
 
         // --- Customer Image ---
-        Texture customerTexture = game.assetManager.get("characters/swagSteve.png", Texture.class);
+        Texture customerTexture = game.assetManager.get("characters/enderman.png", Texture.class);
         Image customerImage = new Image(customerTexture);
         customerImage.setSize(300, 300); // Fixed size
         customerImage.setPosition(0, 0); // Base reference point
 
         // --- Chat Bubble Background ---
-        Texture chatBubbleTexture = game.assetManager.get("chatBubble.png", Texture.class);
+        Texture chatBubbleTexture = game.assetManager.get("ui/chatBubble.png", Texture.class);
         Image chatBubbleImage = new Image(chatBubbleTexture);
         chatBubbleImage.setSize(150, 100); // Smaller and cleaner
         // Position above the top-right corner of customerImage
@@ -68,7 +67,7 @@ public class GameScreen implements Screen {
         );
 
         // --- Burger Image inside the chat bubble ---
-        Texture burgerOrderTexture = game.assetManager.get("missingTexture.png", Texture.class); // Representing burger
+        Texture burgerOrderTexture = game.assetManager.get("ui/missingTexture.png", Texture.class); // Representing burger
         Image burgerOrderImage = new Image(burgerOrderTexture);
         burgerOrderImage.setSize(60, 60); // Make it fit inside chat bubble
         // Center inside the chat bubble
@@ -87,9 +86,13 @@ public class GameScreen implements Screen {
         stage.addActor(customerGroup);
 
         // ======= Center Burger Table =======
-        Texture burgerTableTexture = game.assetManager.get("burgerTable.png", Texture.class);
+        Texture burgerTableTexture = game.assetManager.get("ui/burgerTable.png", Texture.class);
         Image burgerTableImage = new Image(burgerTableTexture);
 
+        // ======= Background =======
+        Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
+        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setFillParent(true);
 
         // ======= Bottom Ingredients =======
         Table ingredientTable = new Table();
@@ -106,6 +109,8 @@ public class GameScreen implements Screen {
         rootTable.add(customerGroup).height(300).center().padBottom(10).row();
         rootTable.add(burgerTableImage).expand().fill().center().row();
         rootTable.add(ingredientTable).bottom().padBottom(20);
+        stage.addActor(backgroundImage);
+        stage.addActor(rootTable);
     }
 
     @Override

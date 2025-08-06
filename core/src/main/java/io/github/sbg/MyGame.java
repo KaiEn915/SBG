@@ -23,14 +23,19 @@ public class MyGame extends Game {
 
         // loading asset manager
         assetManager = new AssetManager();
-            // other textures
-        assetManager.load("burgerTable.png", Texture.class);
-        assetManager.load("missingTexture.png", Texture.class);
-        assetManager.load("chatBubble.png", Texture.class);
+            // ui textures
+        assetManager.load("ui/burgerTable.png", Texture.class);
+        assetManager.load("ui/missingTexture.png", Texture.class);
+        assetManager.load("ui/chatBubble.png", Texture.class);
+        assetManager.load("ui/background.png", Texture.class);
             // ingredient texturess
 
             // character textures
         assetManager.load("characters/swagSteve.png",Texture.class);
+        assetManager.load("characters/playingAlex.png",Texture.class);
+        assetManager.load("characters/enderman.png",Texture.class);
+        assetManager.load("characters/zombie.png",Texture.class);
+        assetManager.load("characters/skeleton.png",Texture.class);
             //
         assetManager.finishLoading();
         //
