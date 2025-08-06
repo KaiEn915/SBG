@@ -48,35 +48,43 @@ public class GameScreen implements Screen {
         topBar.add(pauseButton).left().expandX().pad(10);
         topBar.add(scoreLabel).right().expandX().pad(10);
 
-        // Customer Group
+        // === Customer Group ===
         Group customerGroup = new Group();
-            // ======= Customer Character Image =======
+
+        // --- Customer Image ---
         Texture customerTexture = game.assetManager.get("characters/swagSteve.png", Texture.class);
         Image customerImage = new Image(customerTexture);
+        customerImage.setSize(300, 300); // Fixed size
+        customerImage.setPosition(0, 0); // Base reference point
 
-            // Order Burger Image (chatbox)
-        Texture burgerOrderTexture = game.assetManager.get("missingTexture.png", Texture.class); // This image should visually represent the order
-        Image burgerOrderImage = new Image(burgerOrderTexture);
-
-            // Position it top-right of the customer image
-
-
-            //Background Chatbox Image
-        Texture chatBubbleTexture = game.assetManager.get("chatBubble.png", Texture.class); // chat bubble look
+        // --- Chat Bubble Background ---
+        Texture chatBubbleTexture = game.assetManager.get("chatBubble.png", Texture.class);
         Image chatBubbleImage = new Image(chatBubbleTexture);
+        chatBubbleImage.setSize(150, 100); // Smaller and cleaner
+        // Position above the top-right corner of customerImage
+        chatBubbleImage.setPosition(
+            customerImage.getX() + customerImage.getWidth() - chatBubbleImage.getWidth() * 0.8f,
+            customerImage.getY() + customerImage.getHeight() - 20
+        );
 
-            //
-        customerImage.setSize(300,300);
-        chatBubbleImage.setSize(300,200);
-        burgerOrderImage.setSize(75,150);
-        customerImage.setPosition(-customerImage.getWidth()/2f, 0);
-        chatBubbleImage.setPosition(customerImage.getWidth()/2f, customerImage.getHeight()-100);
-        burgerOrderImage.setPosition(customerImage.getWidth()/2f+chatBubbleImage.getWidth()/2f, customerImage.getHeight()-100+chatBubbleImage.getHeight()/4f);
+        // --- Burger Image inside the chat bubble ---
+        Texture burgerOrderTexture = game.assetManager.get("missingTexture.png", Texture.class); // Representing burger
+        Image burgerOrderImage = new Image(burgerOrderTexture);
+        burgerOrderImage.setSize(60, 60); // Make it fit inside chat bubble
+        // Center inside the chat bubble
+        burgerOrderImage.setPosition(
+            chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerOrderImage.getWidth()) / 2f,
+            chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerOrderImage.getHeight()) / 2f
+        );
+
+        // === Add all to group ===
         customerGroup.addActor(customerImage);
         customerGroup.addActor(chatBubbleImage);
         customerGroup.addActor(burgerOrderImage);
 
-        //
+        // (Optional) Place the entire group on screen
+        customerGroup.setPosition(500, 100); // Example: place near bottom-middle
+        stage.addActor(customerGroup);
 
         // ======= Center Burger Table =======
         Texture burgerTableTexture = game.assetManager.get("burgerTable.png", Texture.class);

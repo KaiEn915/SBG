@@ -27,7 +27,7 @@ public class MyGame extends Game {
         assetManager.load("burgerTable.png", Texture.class);
         assetManager.load("missingTexture.png", Texture.class);
         assetManager.load("chatBubble.png", Texture.class);
-            // ingredient textures
+            // ingredient texturess
 
             // character textures
         assetManager.load("characters/swagSteve.png",Texture.class);
