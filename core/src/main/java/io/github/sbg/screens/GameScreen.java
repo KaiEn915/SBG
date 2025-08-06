@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
         // ======= Compose Layout =======
         rootTable.top().pad(10);
         rootTable.add(topBar).height(200).expandX().fillX().row();
-        rootTable.add(customerGroup).height(300).center().padBottom(10).row();
+        rootTable.add(customerGroup).height(300).center().padBottom(-10).row();
         rootTable.add(burgerTableImage).expand().fill().center().row();
         rootTable.add(ingredientTable).bottom().padBottom(20);
         stage.addActor(backgroundImage);
