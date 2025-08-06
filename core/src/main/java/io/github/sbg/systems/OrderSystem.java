@@ -14,12 +14,12 @@ public class OrderSystem {
     private final PlayerDataSystem playerDataSystem;
     private final IngredientSystem ingredientSystem;
     private List<Order> pendingOrders=new ArrayList<>();
+    private float orderInterval=10,nextOrder=0;
+    private final int MAXIMUM_ORDER_AMOUNT=5;
 
     public OrderSystem(PlayerDataSystem playerDataSystem, IngredientSystem ingredientSystem) {
         this.playerDataSystem = playerDataSystem;
         this.ingredientSystem = ingredientSystem;
-
-        pendingOrders.add(generateRandomOrder());
     }
 
     public Order generateRandomOrder() {
@@ -37,7 +37,7 @@ public class OrderSystem {
         int layers = 2 + random.nextInt(4);
         for (int i = 0; i < layers && !unlockedIngredients.isEmpty(); i++) {
             // random.nextInt() index not start from 2 because id 0, 1 (bun top, bottom) is already filtered
-            order.add(random.nextInt(unlockedIngredients.size()));
+            order.add(unlockedIngredients.get(random.nextInt(unlockedIngredients.size())));
         }
 
         order.add(1); // 1 is bun top
@@ -53,6 +53,12 @@ public class OrderSystem {
         }
 
         pendingOrders.removeIf(Order::isExpired);
+
+        nextOrder-=delta;
+        if (pendingOrders.size() < MAXIMUM_ORDER_AMOUNT && nextOrder <= 0) {
+            pendingOrders.add(generateRandomOrder());
+            nextOrder = orderInterval;
+        }
     }
 
 }

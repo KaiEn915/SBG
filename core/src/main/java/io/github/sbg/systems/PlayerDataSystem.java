@@ -81,6 +81,7 @@ public class PlayerDataSystem {
         ingredientRarities=new HashMap<>();
         unlockIngredient(0);
         unlockIngredient(1);
+        unlockIngredient(2);
         gamePoints=0;
     }
 }
