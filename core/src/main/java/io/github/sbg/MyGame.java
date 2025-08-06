@@ -37,7 +37,7 @@ public class MyGame extends Game {
 
         // load and initialize systems
         ingredientSystem=new IngredientSystem(assetManager);
-        playerDataSystem=new PlayerDataSystem(); // player data will be loaded inside its constructor
+        playerDataSystem=new PlayerDataSystem(); // player data will be loaded inside its constructor.
 
         this.setScreen(new MainMenuScreen(this));
     }
