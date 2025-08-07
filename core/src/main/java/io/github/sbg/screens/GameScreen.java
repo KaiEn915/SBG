@@ -6,22 +6,32 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 import java.util.List;
 import java.util.Collection;
-
+import java.util.Vector;
 
 import io.github.sbg.MyGame;
 import io.github.sbg.models.Ingredient;
 import io.github.sbg.models.Order;
+import io.github.sbg.systems.IngredientSystem;
 import io.github.sbg.systems.OrderSystem;
+import io.github.sbg.ui.CircularTimer; // Import the CircularTimer class
 
 public class GameScreen implements Screen {
     private MyGame game;
@@ -34,9 +44,16 @@ public class GameScreen implements Screen {
     private VerticalGroup playerBurgerGroup;
     private Random random = new Random();
 
+    private ShapeRenderer shapeRenderer;
+
+    // UIs to update
+    Label scoreLabel;
+
     public GameScreen(MyGame game) {
+        shapeRenderer = new ShapeRenderer();
         this.game = game;
-        orderSystem = new OrderSystem(game.playerDataSystem, game.ingredientSystem, this);
+        orderSystem = new OrderSystem(game.playerDataSystem, game.ingredientSystem, this,shapeRenderer);
+
     }
 
     @Override
@@ -51,15 +68,12 @@ public class GameScreen implements Screen {
 
         customerGroup = new Group();
 
-        // === Player Burger Group ===
         playerBurgerGroup = new VerticalGroup();
-        playerBurgerGroup.space(-80);
-
-
+        playerBurgerGroup.space(-120);
 
         // ======= Top Bar =======
         TextButton pauseButton = new TextButton("Pause", skin);
-        Label scoreLabel = new Label("Day 1 | Score: 0", skin);
+        scoreLabel=new Label("Day X | Score: X", skin);
 
         Table topBar = new Table();
         topBar.add(pauseButton).left().expandX().pad(10);
@@ -69,8 +83,18 @@ public class GameScreen implements Screen {
         Texture burgerTableTexture = game.assetManager.get("ui/burgerTable.png", Texture.class);
         Table centerTable = new Table();
         centerTable.setBackground(new TextureRegionDrawable(new TextureRegion(burgerTableTexture)));
+
+        TextButton clearButton=new TextButton("Clear",skin);
+        clearButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                orderSystem.clearPlayerBurger();
+            }
+        });
         centerTable.add(playerBurgerGroup).center().bottom().padBottom(20);
+        centerTable.add(playerBurgerGroup).center().bottom().padRight(100).padBottom(20);
         centerTable.setHeight(300);
+        centerTable.add(clearButton);
 
         // ======= Background =======
         Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
@@ -79,10 +103,16 @@ public class GameScreen implements Screen {
 
         // ======= Bottom Ingredients =======
         Table ingredientTable = new Table();
-        String[] ingredientNames = {"Lettuce", "Tomato", "Patty", "Cheese", "Bun"};
 
-        for (String name : ingredientNames) {
-            TextButton ingredientBtn = new TextButton(name, skin);
+        for (Integer ingredientID : game.playerDataSystem.getUnlockedIngredients()) {
+            Ingredient ingredient= IngredientSystem.getIngredient(ingredientID);
+            TextButton ingredientBtn = new TextButton(ingredient.getName(), skin);
+            ingredientBtn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    orderSystem.addIngredientToPlayerBurger(ingredientID);
+                }
+            });
             ingredientTable.add(ingredientBtn).pad(5);
         }
 
@@ -90,24 +120,23 @@ public class GameScreen implements Screen {
         rootTable.top().pad(10);
         rootTable.add(topBar).height(200).expandX().fillX().row();
         rootTable.add(customerGroup).height(300).center().padBottom(-10).row();
-        rootTable.add(centerTable).expandX().fillX().center().row();
+        rootTable.add(centerTable).height(300).expandX().fillX().center().row();
         rootTable.add(ingredientTable).height(100);
 
         stage.addActor(backgroundImage);
         stage.addActor(rootTable);
 
-        // ======= Test Ingredients =======
-        orderSystem.addIngredientToPlayerBurger(3);
-        orderSystem.addIngredientToPlayerBurger(2);
-        orderSystem.addIngredientToPlayerBurger(4);
+    }
+
+    public MyGame getGame() {
+        return game;
     }
 
     public void updatePlayerBurgerGroup(List<Integer> ingredients) {
         playerBurgerGroup.clear();
-        Collections.reverse(ingredients);
 
-        for (int id : ingredients) {
-            Ingredient ingredient = game.ingredientSystem.getIngredient(id);
+        for (int i=ingredients.size()-1;i>=0;i--) {
+            Ingredient ingredient = IngredientSystem.getIngredient(ingredients.get(i));
             Texture ingredientTexture = ingredient.getTexture();
             Image ingredientImage = new Image(ingredientTexture);
             ingredientImage.setSize(100, 50); // Optional
@@ -120,13 +149,14 @@ public class GameScreen implements Screen {
     }
 
     public void spawnCustomer(Order order) {
-        Group customerGroup = new Group();
+        Group singleCustomerGroup = new Group();
 
-        Texture customerTexture = game.assetManager.get(order.getCharacterTexturePath(), Texture.class);
-        Image customerImage = new Image(customerTexture);
+        //
+        Image customerImage = new Image(order.getCharacterTexture());
         customerImage.setSize(300, 300);
         customerImage.setPosition(0, 0);
 
+        //
         Texture chatBubbleTexture = game.assetManager.get("ui/chatBubble.png", Texture.class);
         Image chatBubbleImage = new Image(chatBubbleTexture);
         chatBubbleImage.setSize(150, 100);
@@ -135,30 +165,68 @@ public class GameScreen implements Screen {
             customerImage.getY() + customerImage.getHeight() - 20
         );
 
-        Texture burgerOrderTexture = game.assetManager.get("ui/missingTexture.png", Texture.class);
-        Image burgerOrderImage = new Image(burgerOrderTexture);
-        burgerOrderImage.setSize(60, 60);
-        burgerOrderImage.setPosition(
-            chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerOrderImage.getWidth()) / 2f,
-            chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerOrderImage.getHeight()) / 2f
+        // burger stack group image
+        float ingredientStackSize=50;
+        VerticalGroup burgerStackGroup=new VerticalGroup();
+        burgerStackGroup.space(-ingredientStackSize/1.5f);
+        burgerStackGroup.reverse();
+        for(int ingredientID:order.getRequiredIngredients()){
+            Ingredient ingredient=IngredientSystem.getIngredient(ingredientID);
+            Texture ingredientTexture = ingredient.getTexture();
+            Image ingredientImage = new Image(ingredientTexture);
+            ingredientImage.setScaling(Scaling.stretch); // makes it scale
+            Container<Image> container = new Container<>(ingredientImage);
+            container.size(ingredientStackSize, ingredientStackSize); // set desired size here
+            burgerStackGroup.addActor(container);
+        }
+        burgerStackGroup.pack();
+
+        burgerStackGroup.setPosition(
+            chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerStackGroup.getWidth()) / 2f,
+            chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerStackGroup.getHeight()) / 2f
         );
 
-        customerGroup.addActor(customerImage);
-        customerGroup.addActor(chatBubbleImage);
-        customerGroup.addActor(burgerOrderImage);
+        //
+        CircularTimer timerActor = order.getTimer();
+        timerActor.setPosition(
+            customerImage.getX() + customerImage.getWidth() / 2f - timerActor.getWidth() / 2f,
+            customerImage.getY() + customerImage.getHeight() + 100
+        );
 
+        //
+        TextButton submitButton=new TextButton("Submit",skin);
+        submitButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                orderSystem.submitPlayerBurgerTo(order);
+            }
+        });
+        submitButton.setSize(150,50);
+        submitButton.setPosition(0,customerImage.getHeight());
+
+
+        float imageWidth = customerImage.getWidth();
         float screenWidth = stage.getViewport().getWorldWidth();
-        float minX = -700;
-        float maxX = screenWidth - 300 - customerImage.getWidth();
+
+        float padding = 200;
+        float minX = -screenWidth / 2 + padding;
+        float maxX = screenWidth / 2 - padding - imageWidth;
+
         float randomX = minX + random.nextFloat() * (maxX - minX);
-        customerGroup.setPosition(randomX, 0);
+        singleCustomerGroup.setPosition(randomX, 0);
 
-        if (MathUtils.randomBoolean()) {
-            customerGroup.setScaleX(-1f);
-            customerGroup.setPosition(randomX + customerGroup.getWidth(), 0);
-        }
+        order.setGroupActor(singleCustomerGroup);
 
-        this.customerGroup.addActor(customerGroup);
+        singleCustomerGroup.addActor(submitButton);
+        singleCustomerGroup.addActor(customerImage);
+        singleCustomerGroup.addActor(chatBubbleImage);
+        singleCustomerGroup.addActor(burgerStackGroup);
+        singleCustomerGroup.addActor(timerActor);
+        customerGroup.addActor(singleCustomerGroup);
+    }
+
+    public Group getCustomerGroup() {
+        return customerGroup;
     }
 
     @Override
@@ -167,6 +235,10 @@ public class GameScreen implements Screen {
         stage.act(delta);
         stage.draw();
         orderSystem.update(delta);
+
+        scoreLabel.setText("Day "+game.playerDataSystem.getDay()+" | Score: "+game.playerDataSystem.getGamePoints());
+        // The OrderSystem's update method should now handle updating the CircularTimer.
+        // The render logic is handled by the Stage's draw() method.
     }
 
     @Override
@@ -189,5 +261,6 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        shapeRenderer.dispose(); // Dispose the ShapeRenderer
     }
 }

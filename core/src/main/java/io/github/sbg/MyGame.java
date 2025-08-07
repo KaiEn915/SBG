@@ -22,6 +22,7 @@ public class MyGame extends Game {
     public void create() {
         skin=new Skin(Gdx.files.internal("craftacular-ui.json"));
 
+
         // loading asset manager
         assetManager = new AssetManager();
             // ui textures
@@ -37,7 +38,9 @@ public class MyGame extends Game {
 
         // load and initialize systems
         ingredientSystem=new IngredientSystem(assetManager);
-        playerDataSystem=new PlayerDataSystem(); // player data will be loaded inside its constructor.
+        playerDataSystem=new PlayerDataSystem();
+        PlayerDataSystem.Instance=playerDataSystem;
+        playerDataSystem.loadData();
 
         this.setScreen(new MainMenuScreen(this));
     }

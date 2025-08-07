@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class IngredientSystem {
-    private final Map<Integer, Ingredient> ingredients = new HashMap<>();
+    private final static Map<Integer, Ingredient> ingredients = new HashMap<>();
     private final AssetManager assetManager;
 
 
@@ -38,7 +38,7 @@ public class IngredientSystem {
         ingredients.put(id, ingredient);
     }
 
-    public Ingredient getIngredient(int id) {
+    public static Ingredient getIngredient(int id) {
         return ingredients.get(id);
     }
 

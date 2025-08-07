@@ -13,12 +13,15 @@ import io.github.sbg.models.Ingredient;
 import io.github.sbg.models.IngredientRarity;
 
 public class PlayerDataSystem {
+    public static PlayerDataSystem Instance;
     private Set<Integer> unlockedIngredients = new HashSet<>();
     private Map<Integer, IngredientRarity> ingredientRarities = new HashMap<>();
     private float gamePoints;
+    private int day;
 
-    public PlayerDataSystem(){
-        loadData();
+
+    public int getDay() {
+        return day;
     }
 
     public IngredientRarity getIngredientRarity(int ingredientID) {
@@ -29,6 +32,10 @@ public class PlayerDataSystem {
         return unlockedIngredients;
     }
 
+    public void addGamePoints(int gamePoints){
+        this.gamePoints+=gamePoints;
+        saveData();
+    }
     public float getGamePoints() {
         return gamePoints;
     }
@@ -63,9 +70,9 @@ public class PlayerDataSystem {
 
         if (file.exists()) {
             Json json = new Json();
+            System.out.println(file.readString());
             PlayerDataSystem loaded = json.fromJson(PlayerDataSystem.class, file.readString());
-            unlockedIngredients=loaded.unlockedIngredients;
-            ingredientRarities=loaded.ingredientRarities;
+
             gamePoints= loaded.gamePoints;
         } else {
             System.out.println("No save file found.");
