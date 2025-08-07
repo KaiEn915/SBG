@@ -21,7 +21,7 @@ public class OrderSystem {
     private List<String> characterTexturePaths=new ArrayList<>();
     private float orderInterval=10,nextOrder=5;
     private final int MAXIMUM_ORDER_AMOUNT=5;
-
+    private List<Integer> playerBurger=new ArrayList<>();
     public OrderSystem(PlayerDataSystem playerDataSystem, IngredientSystem ingredientSystem,GameScreen gameScreen) {
         this.playerDataSystem = playerDataSystem;
         this.ingredientSystem = ingredientSystem;
@@ -36,6 +36,11 @@ public class OrderSystem {
             }
         }
 
+    }
+
+    public void addIngredientToPlayerBurger(int id){
+        playerBurger.add(id);
+        gameScreen.updatePlayerBurgerGroup(playerBurger);
     }
 
 

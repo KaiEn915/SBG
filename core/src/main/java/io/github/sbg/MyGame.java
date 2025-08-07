@@ -27,7 +27,7 @@ public class MyGame extends Game {
             // ui textures
         loadAssetTextures("ui");
             // ingredient textures
-//        loadAssetTextures("ingredients");
+        loadAssetTextures("ingredients");
             // character textures
         loadAssetTextures("characters");
 
