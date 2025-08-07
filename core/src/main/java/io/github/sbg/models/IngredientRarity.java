@@ -1,5 +1,7 @@
 package io.github.sbg.models;
 
+import com.badlogic.gdx.graphics.Color;
+
 public enum IngredientRarity {
     COMMON(0),
     UNCOMMON(1),
@@ -32,6 +34,21 @@ public enum IngredientRarity {
                 return LEGENDARY;
         }
     }
-
+    public Color getBorderColor(){
+       switch (this) {
+            case COMMON:
+                return Color.WHITE;
+            case UNCOMMON:
+                return Color.GREEN;
+            case RARE:
+                return Color.BLUE;
+            case EPIC:
+                return Color.PURPLE;
+            case LEGENDARY:
+                return Color.YELLOW;
+            default:
+                return Color.WHITE;
+        }
+    }
 }
 

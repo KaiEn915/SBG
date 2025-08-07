@@ -100,6 +100,7 @@ public class OrderSystem {
         gameScreen.spawnCustomer(generatedOrder);
     }
 
+
     public void abort(Order order) { // customer order is expired
         pendingOrders.remove(order);
         gameScreen.getCustomerGroup().removeActor(order.getGroupActor());
@@ -120,10 +121,20 @@ public class OrderSystem {
     }
     public void orderSuccess(Order order){
         System.out.println("Order success!");
-        gameScreen.getGame().playerDataSystem.addGamePoints(order.calcRewardPoints());
+        float percentage=order.getTimer().getTimeLeft()/order.getTimer().getDuration();
+        float baseScore=100;
+        gameScreen.addScore(baseScore*percentage);
+            // add game points later
         abort(order);
+
+        PlayerDataSystem.Instance.saveData();
     }
     public void orderFail(Order order){
         System.out.println("Order fail! Moved to container");
+        order.getTimer().reduce(10);
+    }
+    public void orderExpire(Order order){
+        gameScreen.halfScore();
+        abort(order);
     }
 }

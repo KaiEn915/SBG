@@ -29,6 +29,9 @@ public class CircularTimer extends Actor {
         // Set the size of the actor to match the timer
         this.setSize(radius * 2, radius * 2);
     }
+    public void reduce(float duration){
+        timeLeft-=duration;
+    }
 
     // Use the act() method for logic updates
     @Override
@@ -37,9 +40,17 @@ public class CircularTimer extends Actor {
 
         timeLeft -= delta;
         if (timeLeft < 0) {
-            orderSystem.abort(order);
+            orderSystem.orderExpire(order);
             timeLeft = 0;
         }
+    }
+
+    public float getTimeLeft() {
+        return timeLeft;
+    }
+
+    public float getDuration() {
+        return duration;
     }
 
     // Use the draw() method for rendering

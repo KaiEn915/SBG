@@ -15,7 +15,8 @@ import io.github.sbg.models.IngredientRarity;
 public class PlayerDataSystem {
     public static PlayerDataSystem Instance;
     private Set<Integer> unlockedIngredients = new HashSet<>();
-    private Map<Integer, IngredientRarity> ingredientRarities = new HashMap<>();
+    private transient Map<Integer, IngredientRarity> ingredientRarities = new HashMap<>();
+    private List<IngredientRarity> ingredientRaritiesForSaving=new ArrayList<>();
     private float gamePoints;
     private int day;
 
@@ -25,7 +26,9 @@ public class PlayerDataSystem {
     }
 
     public IngredientRarity getIngredientRarity(int ingredientID) {
-        return ingredientRarities.getOrDefault(ingredientID, IngredientRarity.COMMON);
+        IngredientRarity rarity=ingredientRarities.getOrDefault(ingredientID, IngredientRarity.COMMON);
+        System.out.println("Rarity for id: "+ingredientID+" is "+rarity);
+        return rarity;
     }
 
     public Set<Integer> getUnlockedIngredients() {
@@ -47,7 +50,7 @@ public class PlayerDataSystem {
 
     public void unlockIngredient(int id) {
         if (!unlockedIngredients.contains(id)){
-            ingredientRarities.put(id,IngredientRarity.COMMON); // initially common
+            ingredientRarities.put(id,IngredientRarity.UNCOMMON); // initially common
         }
         unlockedIngredients.add(id);
     }
@@ -60,7 +63,12 @@ public class PlayerDataSystem {
     public void saveData() {
 
         Json json = new Json();
-
+        // ingredientRaritiesForSaving
+        ingredientRaritiesForSaving.clear();
+        for(int i=0;i<ingredientRarities.size();i++){
+            ingredientRaritiesForSaving.add(ingredientRarities.get(i));
+        }
+        //
         FileHandle file = Gdx.files.local("playerData.json");
         file.writeString(json.prettyPrint(this), false);
     }
@@ -70,9 +78,14 @@ public class PlayerDataSystem {
 
         if (file.exists()) {
             Json json = new Json();
-            System.out.println(file.readString());
             PlayerDataSystem loaded = json.fromJson(PlayerDataSystem.class, file.readString());
 
+            unlockedIngredients=loaded.unlockedIngredients;
+            // load ingredientRarities
+            ingredientRarities.clear();
+            for(int i=0;i<loaded.ingredientRaritiesForSaving.size();i++){
+                ingredientRarities.put(i,loaded.ingredientRaritiesForSaving.get(i));
+            }
             gamePoints= loaded.gamePoints;
         } else {
             System.out.println("No save file found.");

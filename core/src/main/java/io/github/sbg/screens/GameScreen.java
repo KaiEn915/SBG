@@ -2,6 +2,7 @@ package io.github.sbg.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -31,6 +33,7 @@ import io.github.sbg.models.Ingredient;
 import io.github.sbg.models.Order;
 import io.github.sbg.systems.IngredientSystem;
 import io.github.sbg.systems.OrderSystem;
+import io.github.sbg.systems.PlayerDataSystem;
 import io.github.sbg.ui.CircularTimer; // Import the CircularTimer class
 
 public class GameScreen implements Screen {
@@ -48,6 +51,7 @@ public class GameScreen implements Screen {
 
     // UIs to update
     Label scoreLabel;
+    private float score;
 
     public GameScreen(MyGame game) {
         shapeRenderer = new ShapeRenderer();
@@ -103,25 +107,64 @@ public class GameScreen implements Screen {
 
         // ======= Bottom Ingredients =======
         Table ingredientTable = new Table();
+        int columns = 5;
+        int count = 0;
 
         for (Integer ingredientID : game.playerDataSystem.getUnlockedIngredients()) {
-            Ingredient ingredient= IngredientSystem.getIngredient(ingredientID);
-            TextButton ingredientBtn = new TextButton(ingredient.getName(), skin);
-            ingredientBtn.addListener(new ClickListener() {
+            Ingredient ingredient = IngredientSystem.getIngredient(ingredientID);
+            Texture texture = ingredient.getTexture();
+
+            Group ingredientGroup = new Group();
+            float groupSize = 175;
+            float imageSize = groupSize/2;
+
+            // Add 5 images randomly
+            for (int i = 0; i < 15; i++) {
+                Image img = new Image(texture);
+                img.setSize(imageSize, imageSize);
+                float x = MathUtils.random(0, groupSize - imageSize);
+                float y = MathUtils.random(0, groupSize - imageSize);
+                img.setPosition(x, y);
+                ingredientGroup.addActor(img);
+            }
+            ingredientGroup.setSize(groupSize, groupSize);
+
+            // Make group clickable
+            final int finalIngredientID = ingredientID;
+            ingredientGroup.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    orderSystem.addIngredientToPlayerBurger(ingredientID);
+                    orderSystem.addIngredientToPlayerBurger(finalIngredientID);
                 }
             });
-            ingredientTable.add(ingredientBtn).pad(5);
+
+            // Container with background and border
+            Container<Actor> backgroundContainer = new Container<>();
+            Drawable background=skin.getDrawable("window");
+            backgroundContainer.setBackground(background);
+            backgroundContainer.setColor(PlayerDataSystem.Instance.getIngredientRarity(ingredientID).getBorderColor());
+
+            // Stack: background below, group on top
+            Stack stackedGroup = new Stack();
+            stackedGroup.setSize(backgroundContainer.getWidth(), backgroundContainer.getHeight());
+            stackedGroup.addActor(backgroundContainer);
+            stackedGroup.addActor(ingredientGroup);
+
+            // Add to table
+            ingredientTable.add(stackedGroup).size(groupSize,groupSize).pad(10);
+            count++;
+            if (count % columns == 0) ingredientTable.row();
         }
+
+
+
 
         // ======= Compose Layout =======
         rootTable.top().pad(10);
         rootTable.add(topBar).height(200).expandX().fillX().row();
         rootTable.add(customerGroup).height(300).center().padBottom(-10).row();
         rootTable.add(centerTable).height(300).expandX().fillX().center().row();
-        rootTable.add(ingredientTable).height(100);
+        rootTable.add(ingredientTable).bottom();
 
         stage.addActor(backgroundImage);
         stage.addActor(rootTable);
@@ -229,6 +272,13 @@ public class GameScreen implements Screen {
         return customerGroup;
     }
 
+
+    public void addScore(float score){
+        this.score+=score;
+    }
+    public void halfScore(){
+        score/=2;
+    }
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -236,7 +286,7 @@ public class GameScreen implements Screen {
         stage.draw();
         orderSystem.update(delta);
 
-        scoreLabel.setText("Day "+game.playerDataSystem.getDay()+" | Score: "+game.playerDataSystem.getGamePoints());
+        scoreLabel.setText("Day "+game.playerDataSystem.getDay()+" | Score: "+score);
         // The OrderSystem's update method should now handle updating the CircularTimer.
         // The render logic is handled by the Stage's draw() method.
     }
