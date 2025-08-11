@@ -33,5 +33,8 @@ public class Ingredient {
         return texture;
     }
 
+    public float getValueBasedOnRarity(IngredientRarity rarity) {
+        return baseValue * rarity.getMultiplier();
+    }
 
 }

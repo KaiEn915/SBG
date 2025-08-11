@@ -39,7 +39,6 @@ public class MyGame extends Game {
         // load and initialize systems
         ingredientSystem=new IngredientSystem(assetManager);
         playerDataSystem=new PlayerDataSystem();
-        PlayerDataSystem.Instance=playerDataSystem;
         playerDataSystem.loadData();
 
         this.setScreen(new MainMenuScreen(this));

@@ -13,9 +13,12 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Cullable;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.DelayedRemovalArray;
 import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.SnapshotArray;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -34,6 +37,7 @@ import io.github.sbg.models.Order;
 import io.github.sbg.systems.IngredientSystem;
 import io.github.sbg.systems.OrderSystem;
 import io.github.sbg.systems.PlayerDataSystem;
+
 import io.github.sbg.ui.CircularTimer; // Import the CircularTimer class
 
 public class GameScreen implements Screen {
@@ -50,13 +54,20 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
 
     // UIs to update
-    Label scoreLabel;
+    private Label infoLabel;
     private float score;
+    private float pointsEarned; // points earned this day
+    private Label timerLabel;
+
+    private float timer=10;
+    private Table cabinet;
+
+    private int currentDay;
 
     public GameScreen(MyGame game) {
         shapeRenderer = new ShapeRenderer();
         this.game = game;
-        orderSystem = new OrderSystem(game.playerDataSystem, game.ingredientSystem, this,shapeRenderer);
+        orderSystem = new OrderSystem(game.playerDataSystem,this,shapeRenderer);
 
     }
 
@@ -72,21 +83,42 @@ public class GameScreen implements Screen {
 
         customerGroup = new Group();
 
-        playerBurgerGroup = new VerticalGroup();
-        playerBurgerGroup.space(-120);
+        currentDay=PlayerDataSystem.Instance.getDay();
 
         // ======= Top Bar =======
         TextButton pauseButton = new TextButton("Pause", skin);
-        scoreLabel=new Label("Day X | Score: X", skin);
 
         Table topBar = new Table();
         topBar.add(pauseButton).left().expandX().pad(10);
-        topBar.add(scoreLabel).right().expandX().pad(10);
+        timerLabel=new Label("Time Left: X", skin);
+        topBar.add(timerLabel).center().expandX().pad(10);
+        infoLabel=new Label("Day X | Score: X | Point: X", skin);
+        topBar.add(infoLabel).right().expandX().pad(10);
 
-        // ======= Center Burger Table =======
-        Texture burgerTableTexture = game.assetManager.get("ui/burgerTable.png", Texture.class);
+        // ======= Center Table =======
         Table centerTable = new Table();
-        centerTable.setBackground(new TextureRegionDrawable(new TextureRegion(burgerTableTexture)));
+        centerTable.setHeight(300);
+        Table burgerTable=new Table();
+        cabinet=new Table();
+        playerBurgerGroup=new VerticalGroup();
+        playerBurgerGroup.space(-120);
+
+
+        ScrollPane playerBurgerPane=new ScrollPane(playerBurgerGroup,skin);
+        playerBurgerPane.setScrollingDisabled(true, false);
+
+        ScrollPane cabinetPane=new ScrollPane(cabinet,skin);
+        cabinetPane.setScrollingDisabled(false, true);
+
+        Texture burgerTableTexture = game.assetManager.get("ui/burgerTable.png", Texture.class);
+        TextureRegionDrawable burgerTableDrawable =
+            new TextureRegionDrawable(new TextureRegion(burgerTableTexture));
+
+        burgerTable.setBackground(burgerTableDrawable);
+        burgerTable.add(playerBurgerPane).width(300).height(300).center();
+
+        centerTable.add(burgerTable).expandX().fillX().colspan(3);
+        centerTable.add(cabinetPane).fillX().prefWidth(300).colspan(1);
 
         TextButton clearButton=new TextButton("Clear",skin);
         clearButton.addListener(new ClickListener(){
@@ -95,10 +127,8 @@ public class GameScreen implements Screen {
                 orderSystem.clearPlayerBurger();
             }
         });
-        centerTable.add(playerBurgerGroup).center().bottom().padBottom(20);
-        centerTable.add(playerBurgerGroup).center().bottom().padRight(100).padBottom(20);
-        centerTable.setHeight(300);
-        centerTable.add(clearButton);
+
+        burgerTable.add(clearButton).center().padRight(100);
 
         // ======= Background =======
         Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
@@ -160,10 +190,10 @@ public class GameScreen implements Screen {
 
 
         // ======= Compose Layout =======
-        rootTable.top().pad(10);
-        rootTable.add(topBar).height(200).expandX().fillX().row();
+        rootTable.add(topBar).height(100).expandX().fillX().colspan(4).row();
         rootTable.add(customerGroup).height(300).center().padBottom(-10).row();
         rootTable.add(centerTable).height(300).expandX().fillX().center().row();
+        centerTable.debug();
         rootTable.add(ingredientTable).bottom();
 
         stage.addActor(backgroundImage);
@@ -171,6 +201,9 @@ public class GameScreen implements Screen {
 
     }
 
+    public void addPointsEarned(float point){
+        pointsEarned+=point;
+    }
     public MyGame getGame() {
         return game;
     }
@@ -209,21 +242,7 @@ public class GameScreen implements Screen {
         );
 
         // burger stack group image
-        float ingredientStackSize=50;
-        VerticalGroup burgerStackGroup=new VerticalGroup();
-        burgerStackGroup.space(-ingredientStackSize/1.5f);
-        burgerStackGroup.reverse();
-        for(int ingredientID:order.getRequiredIngredients()){
-            Ingredient ingredient=IngredientSystem.getIngredient(ingredientID);
-            Texture ingredientTexture = ingredient.getTexture();
-            Image ingredientImage = new Image(ingredientTexture);
-            ingredientImage.setScaling(Scaling.stretch); // makes it scale
-            Container<Image> container = new Container<>(ingredientImage);
-            container.size(ingredientStackSize, ingredientStackSize); // set desired size here
-            burgerStackGroup.addActor(container);
-        }
-        burgerStackGroup.pack();
-
+        VerticalGroup burgerStackGroup=getPlayerBurgerGroup(order.getRequiredIngredients());
         burgerStackGroup.setPosition(
             chatBubbleImage.getX() + (chatBubbleImage.getWidth() - burgerStackGroup.getWidth()) / 2f,
             chatBubbleImage.getY() + (chatBubbleImage.getHeight() - burgerStackGroup.getHeight()) / 2f
@@ -268,6 +287,25 @@ public class GameScreen implements Screen {
         customerGroup.addActor(singleCustomerGroup);
     }
 
+    public VerticalGroup getPlayerBurgerGroup(List<Integer> burger){
+        float ingredientStackSize=50;
+        VerticalGroup burgerStackGroup=new VerticalGroup();
+        burgerStackGroup.space(-ingredientStackSize/1.5f);
+        burgerStackGroup.reverse();
+        for(int ingredientID:burger){
+            Ingredient ingredient= IngredientSystem.getIngredient(ingredientID);
+            Texture ingredientTexture = ingredient.getTexture();
+            Image ingredientImage = new Image(ingredientTexture);
+            ingredientImage.setScaling(Scaling.stretch); // makes it scale
+            Container<Image> container = new Container<>(ingredientImage);
+            container.size(ingredientStackSize, ingredientStackSize); // set desired size here
+            burgerStackGroup.addActor(container);
+        }
+        burgerStackGroup.pack();
+        return burgerStackGroup;
+    }
+
+
     public Group getCustomerGroup() {
         return customerGroup;
     }
@@ -279,17 +317,110 @@ public class GameScreen implements Screen {
     public void halfScore(){
         score/=2;
     }
+
+    public Table getCabinet() {
+        return cabinet;
+    }
+    public void moveBurgerToCabinet(List<Integer> burger){
+        VerticalGroup playerBurgerGroup=getPlayerBurgerGroup(burger);
+        cabinet.add(playerBurgerGroup);
+    }
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
-        orderSystem.update(delta);
+        timer-=delta;
+        if (timer<=0){
+            gameOver();
+            return;
+        }
 
-        scoreLabel.setText("Day "+game.playerDataSystem.getDay()+" | Score: "+score);
+
+        orderSystem.update(delta);
+        infoLabel.setText("Day "+currentDay+" | Score: "+score+" | Point: "+PlayerDataSystem.Instance.getGamePoints());
+        timerLabel.setText("Time Left: "+(int)Math.ceil(timer));
         // The OrderSystem's update method should now handle updating the CircularTimer.
         // The render logic is handled by the Stage's draw() method.
     }
+
+    public void gameOver() {
+        // Pause the game
+        stage.getRoot().clearChildren();
+        Gdx.input.setInputProcessor(stage);
+        // Create a semi-transparent overlay
+        Image overlay = new Image(skin.newDrawable("white", new Color(0, 0, 0, 0.7f)));
+        overlay.setFillParent(true);
+        stage.addActor(overlay);
+
+        // Main game over window
+        Window gameOverWindow = new Window("",skin);
+        gameOverWindow.pad(20);
+        gameOverWindow.setModal(true);
+
+
+        Label gameOverLabel = new Label("Game Over", skin);
+
+        // highest point
+        float highestScore=PlayerDataSystem.Instance.getHighestScore();
+        if (score>highestScore){
+            PlayerDataSystem.Instance.setHighestScore(score);
+            highestScore=score;
+        }
+
+        Label highestPointLabel=new Label("Highest Score: "+highestScore,skin);
+
+        // Total money
+        Label moneyLabel = new Label("Total Points Earned: " + pointsEarned, skin);
+
+        // Score earned this day
+        Label scoreLabel = new Label("Score This Day: " + score, skin);
+
+        // Wrong burgers from cabinet
+        Table wrongBurgersTable = new Table();
+        wrongBurgersTable.defaults().pad(5);
+        for (Actor burgerGroup : cabinet.getChildren()) {
+            wrongBurgersTable.add(getPlayerBurgerGroup(Arrays.asList(0, 2, 1))).prefSize(10).row();
+
+        }
+        ScrollPane wrongBurgersPane = new ScrollPane(wrongBurgersTable, skin);
+        wrongBurgersPane.setFadeScrollBars(false);
+        wrongBurgersPane.setScrollingDisabled(false, true);
+        wrongBurgersPane.pack();
+        Label wrongLabel = new Label("Wrong Burgers:", skin);
+
+        // Back to main menu button
+        TextButton backButton = new TextButton("Back to Main Menu, Proceed to the next day.", skin);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MainMenuScreen(game)); // Replace with your main menu screen class
+                PlayerDataSystem.Instance.nextDay();
+            }
+        });
+
+        // Add everything to window
+        gameOverWindow.add(gameOverLabel).center().row();
+        gameOverWindow.add(moneyLabel).left().row();
+        gameOverWindow.add(scoreLabel).left().row();
+        gameOverWindow.add(highestPointLabel).left().row();
+
+
+        gameOverWindow.add(wrongLabel).left().row();
+        gameOverWindow.add(wrongBurgersPane).size(300, 200).row();
+        gameOverWindow.add(backButton).padTop(10).center();
+
+        gameOverWindow.pack();
+        gameOverWindow.setPosition(
+            (stage.getWidth() - gameOverWindow.getWidth()) / 2f,
+            (stage.getHeight() - gameOverWindow.getHeight()) / 2f
+        );
+
+        stage.addActor(gameOverWindow);
+
+
+    }
+
 
     @Override
     public void resize(int width, int height) {

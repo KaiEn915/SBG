@@ -3,20 +3,20 @@ package io.github.sbg.models;
 import com.badlogic.gdx.graphics.Color;
 
 public enum IngredientRarity {
-    COMMON(0),
-    UNCOMMON(1),
-    RARE(2),
-    EPIC(3),
-    LEGENDARY(4);
+    COMMON(1f),
+    UNCOMMON(1.25f),
+    RARE(1.5f),
+    EPIC(1.75f),
+    LEGENDARY(2f);
 
-    private final int level;
+    private final float multiplier;
 
-    IngredientRarity(int level) {
-        this.level = level;
+    IngredientRarity(float multiplier) {
+        this.multiplier = multiplier;
     }
 
-    public int getLevel() {
-        return level;
+    public float getMultiplier() {
+        return multiplier;
     }
 
     public IngredientRarity next() {
@@ -31,7 +31,7 @@ public enum IngredientRarity {
                 return LEGENDARY;
             case LEGENDARY:
             default:
-                return LEGENDARY;
+                return COMMON;
         }
     }
     public Color getBorderColor(){

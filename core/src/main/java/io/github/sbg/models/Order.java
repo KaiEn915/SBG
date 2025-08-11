@@ -57,16 +57,13 @@ public class Order {
         }
         return true;
     }
-    public int calcRewardPoints(){
-        int total=0;
-
-        for(int ingredientID : requiredIngredients){
-            Ingredient ingredient= IngredientSystem.getIngredient(ingredientID);
-            IngredientRarity currentRarity= PlayerDataSystem.Instance.getIngredientRarity(ingredientID);
-            total += MathUtils.round(ingredient.getBaseValue()*(currentRarity.getLevel()+1));
+    public float calcRewardPoints(){
+        float total=0;
+        for (int ingredientID:requiredIngredients){
+            Ingredient ingredient=IngredientSystem.getIngredient(ingredientID);
+            IngredientRarity rarity=PlayerDataSystem.Instance.getIngredientRarity(ingredientID);
+            total+=ingredient.getValueBasedOnRarity(rarity);
         }
-
-
         return total;
     }
 }

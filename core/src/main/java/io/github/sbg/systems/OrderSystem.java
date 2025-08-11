@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import io.github.sbg.models.Ingredient;
+import io.github.sbg.models.IngredientRarity;
 import io.github.sbg.models.Order;
 import io.github.sbg.screens.GameScreen;
 import io.github.sbg.ui.CircularTimer;
@@ -18,23 +19,28 @@ import io.github.sbg.ui.CircularTimer;
 public class OrderSystem {
     private final Random random = new Random();
     private final PlayerDataSystem playerDataSystem;
-    private final IngredientSystem ingredientSystem;
     private final GameScreen gameScreen;
     private List<Order> pendingOrders = new ArrayList<>();
     private List<Texture> characterTextures = new ArrayList<>();
-    private float orderInterval = 2, nextOrder = 5;
+    private float orderInterval = 2, nextOrder = 2;
     private final int MAXIMUM_ORDER_AMOUNT = 5;
     private List<Integer> playerBurger = new ArrayList<>();
     private ShapeRenderer shapeRenderer; // Add a ShapeRenderer instance
 
-    public OrderSystem(PlayerDataSystem playerDataSystem, IngredientSystem ingredientSystem, GameScreen gameScreen, ShapeRenderer shapeRenderer) {
+    public OrderSystem(PlayerDataSystem playerDataSystem, GameScreen gameScreen, ShapeRenderer shapeRenderer) {
         this.playerDataSystem = playerDataSystem;
-        this.ingredientSystem = ingredientSystem;
         this.gameScreen = gameScreen;
         this.shapeRenderer = shapeRenderer; // Initialize ShapeRenderer
         loadCharacterTextures();
     }
+    public void update(float delta) {
+        nextOrder -= delta;
 
+        if (pendingOrders.size() < MAXIMUM_ORDER_AMOUNT && nextOrder <= 0) {
+            spawnOrder();
+            nextOrder = orderInterval;
+        }
+    }
     public void loadCharacterTextures() {
         FileHandle directory = Gdx.files.internal("assets/characters");
         if (directory.isDirectory()) {
@@ -54,7 +60,7 @@ public class OrderSystem {
         gameScreen.updatePlayerBurgerGroup(playerBurger);
     }
 
-    public Order getRandomGeneratedOrder() {
+    public Order generateRandomOrder() {
         List<Integer> orderIngredients = new ArrayList<>(); // order means the ingredients in the order (use ingredient id)
         // decide customer character texture
         Texture characterTexture = characterTextures.get(random.nextInt(characterTextures.size()));
@@ -85,17 +91,10 @@ public class OrderSystem {
         return order;
     }
 
-    public void update(float delta) {
-        nextOrder -= delta;
 
-        if (pendingOrders.size() < MAXIMUM_ORDER_AMOUNT && nextOrder <= 0) {
-            generateOrder();
-            nextOrder = orderInterval;
-        }
-    }
 
-    public void generateOrder() {
-        Order generatedOrder = getRandomGeneratedOrder();
+    public void spawnOrder() {
+        Order generatedOrder = generateRandomOrder();
         pendingOrders.add(generatedOrder);
         gameScreen.spawnCustomer(generatedOrder);
     }
@@ -121,20 +120,30 @@ public class OrderSystem {
     }
     public void orderSuccess(Order order){
         System.out.println("Order success!");
+
         float percentage=order.getTimer().getTimeLeft()/order.getTimer().getDuration();
-        float baseScore=100;
-        gameScreen.addScore(baseScore*percentage);
-            // add game points later
+
+        // add score
+        float scores=100*percentage;
+        gameScreen.addScore(scores);
+
+        // add game points
+        float rewardPoints=order.calcRewardPoints();
+        PlayerDataSystem.Instance.addGamePoints(rewardPoints);
+        gameScreen.addPointsEarned(rewardPoints);
+
         abort(order);
 
+        System.out.println("Earned scores: "+scores+" | Earned points: "+rewardPoints);
         PlayerDataSystem.Instance.saveData();
     }
     public void orderFail(Order order){
-        System.out.println("Order fail! Moved to container");
+        gameScreen.moveBurgerToCabinet(playerBurger);
         order.getTimer().reduce(10);
     }
     public void orderExpire(Order order){
         gameScreen.halfScore();
         abort(order);
     }
+
 }
