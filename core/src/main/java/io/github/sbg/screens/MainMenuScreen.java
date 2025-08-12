@@ -3,8 +3,11 @@ package io.github.sbg.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.sbg.MyGame;
 
@@ -27,6 +30,9 @@ public class MainMenuScreen extends ScreenAdapter {
 
         Table table = new Table();
         table.setFillParent(true);
+
+        TextureRegionDrawable backgroundDrawable=new TextureRegionDrawable(new TextureRegion(game.assetManager.get("ui/background2.png",Texture.class)));
+        table.setBackground(backgroundDrawable);
         stage.addActor(table);
 
         // Buttons

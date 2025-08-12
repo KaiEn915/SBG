@@ -26,9 +26,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.List;
 import java.util.Collection;
+import java.util.Set;
 import java.util.Vector;
 
 import io.github.sbg.MyGame;
@@ -46,7 +48,7 @@ public class GameScreen implements Screen {
     private Skin skin;
 
     private OrderSystem orderSystem;
-    private Table rootTable;
+    private Stack rootStack;
     private Group customerGroup;
     private VerticalGroup playerBurgerGroup;
     private Random random = new Random();
@@ -77,27 +79,58 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         skin = game.skin;
-
-        rootTable = new Table();
-        rootTable.setFillParent(true);
+        currentDay=PlayerDataSystem.Instance.getDay();
 
         customerGroup = new Group();
 
-        currentDay=PlayerDataSystem.Instance.getDay();
 
-        // ======= Top Bar =======
-        TextButton pauseButton = new TextButton("Pause", skin);
+        rootStack = new Stack();
+        rootStack.setFillParent(true);
+        rootStack.debug();
+        // ======= Compose Layout =======
+        rootStack.add(loadTopBar().top());
+        rootStack.add(loadRootTable().bottom());
 
+        stage.addActor(loadBackground());
+        stage.addActor(rootStack);
+
+    }
+    public Image loadBackground(){
+        Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
+        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setFillParent(true);
+        return backgroundImage;
+    }
+
+    public Table loadTopBar(){
         Table topBar = new Table();
+        TextButton pauseButton = new TextButton("Pause", skin);
         topBar.add(pauseButton).left().expandX().pad(10);
         timerLabel=new Label("Time Left: X", skin);
         topBar.add(timerLabel).center().expandX().pad(10);
         infoLabel=new Label("Day X | Score: X | Point: X", skin);
         topBar.add(infoLabel).right().expandX().pad(10);
+        return topBar;
+    }
 
-        // ======= Center Table =======
+
+    public Table loadRootTable(){
+        Table rootTable=new Table();
+        Table centerTable=loadCenterTable();
+        centerTable.debug();
+        Table ingredientTable=loadIngredientTable(false);
+
+        rootTable.add(customerGroup).expandX().fillX().row();
+        rootTable.add(centerTable).height(200).expandX().fillX().row();
+        rootTable.add(ingredientTable).expandX().fillX();
+
+
+
+        rootTable.debug();
+        return rootTable;
+    }
+    public Table loadCenterTable(){
         Table centerTable = new Table();
-        centerTable.setHeight(300);
         Table burgerTable=new Table();
         cabinet=new Table();
         playerBurgerGroup=new VerticalGroup();
@@ -115,10 +148,9 @@ public class GameScreen implements Screen {
             new TextureRegionDrawable(new TextureRegion(burgerTableTexture));
 
         burgerTable.setBackground(burgerTableDrawable);
-        burgerTable.add(playerBurgerPane).width(300).height(300).center();
+        burgerTable.add(playerBurgerPane).width(300).padTop(10).padBottom(10).center();
 
-        centerTable.add(burgerTable).expandX().fillX().colspan(3);
-        centerTable.add(cabinetPane).fillX().prefWidth(300).colspan(1);
+
 
         TextButton clearButton=new TextButton("Clear",skin);
         clearButton.addListener(new ClickListener(){
@@ -130,23 +162,22 @@ public class GameScreen implements Screen {
 
         burgerTable.add(clearButton).center().padRight(100);
 
-        // ======= Background =======
-        Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
-        Image backgroundImage = new Image(backgroundTexture);
-        backgroundImage.setFillParent(true);
-
-        // ======= Bottom Ingredients =======
+        centerTable.add(burgerTable).expandX().fillX().colspan(3);
+        centerTable.add(cabinetPane).fillX().prefWidth(300).colspan(1);
+        return centerTable;
+    }
+    public Table loadIngredientTable(boolean isPrepareStage){
         Table ingredientTable = new Table();
-        int columns = 5;
+        int columns = 8;
         int count = 0;
 
-        for (Integer ingredientID : game.playerDataSystem.getUnlockedIngredients()) {
+        for (Integer ingredientID : (!isPrepareStage? IngredientSystem.getAllIngredients() : game.playerDataSystem.getUnlockedIngredients())) {
             Ingredient ingredient = IngredientSystem.getIngredient(ingredientID);
             Texture texture = ingredient.getTexture();
 
             Group ingredientGroup = new Group();
-            float groupSize = 175;
-            float imageSize = groupSize/2;
+            float groupSize = 125;
+            float imageSize = groupSize/3;
 
             // Add 5 images randomly
             for (int i = 0; i < 15; i++) {
@@ -181,24 +212,11 @@ public class GameScreen implements Screen {
             stackedGroup.addActor(ingredientGroup);
 
             // Add to table
-            ingredientTable.add(stackedGroup).size(groupSize,groupSize).pad(10);
+            ingredientTable.add(stackedGroup).size(groupSize,groupSize);
             count++;
             if (count % columns == 0) ingredientTable.row();
         }
-
-
-
-
-        // ======= Compose Layout =======
-        rootTable.add(topBar).height(100).expandX().fillX().colspan(4).row();
-        rootTable.add(customerGroup).height(300).center().padBottom(-10).row();
-        rootTable.add(centerTable).height(300).expandX().fillX().center().row();
-        centerTable.debug();
-        rootTable.add(ingredientTable).bottom();
-
-        stage.addActor(backgroundImage);
-        stage.addActor(rootTable);
-
+        return ingredientTable;
     }
 
     public void addPointsEarned(float point){
@@ -225,6 +243,32 @@ public class GameScreen implements Screen {
     }
 
     public void spawnCustomer(Order order) {
+        float screenWidth = stage.getViewport().getWorldWidth();
+        // deciding spawning x first
+        Set<Float> existingSpawnX = new HashSet<>();
+        for (Actor actor : customerGroup.getChildren()) {
+            existingSpawnX.add(actor.getX());
+        }
+
+        float minX = screenWidth * 0.25f;
+        float maxX = screenWidth * 0.75f;
+
+        float randomX;
+        boolean validPosition;
+
+        do {
+            randomX = minX + random.nextFloat() * (maxX - minX);
+            validPosition = true;
+
+            for (float x : existingSpawnX) {
+                if (Math.abs(randomX - x) < 300f) { // minimum 30px gap
+                    validPosition = false;
+                    break;
+                }
+            }
+
+        } while (!validPosition);
+
         Group singleCustomerGroup = new Group();
 
         //
@@ -252,7 +296,7 @@ public class GameScreen implements Screen {
         CircularTimer timerActor = order.getTimer();
         timerActor.setPosition(
             customerImage.getX() + customerImage.getWidth() / 2f - timerActor.getWidth() / 2f,
-            customerImage.getY() + customerImage.getHeight() + 100
+            customerImage.getY() + customerImage.getHeight()
         );
 
         //
@@ -267,14 +311,10 @@ public class GameScreen implements Screen {
         submitButton.setPosition(0,customerImage.getHeight());
 
 
-        float imageWidth = customerImage.getWidth();
-        float screenWidth = stage.getViewport().getWorldWidth();
 
-        float padding = 200;
-        float minX = -screenWidth / 2 + padding;
-        float maxX = screenWidth / 2 - padding - imageWidth;
 
-        float randomX = minX + random.nextFloat() * (maxX - minX);
+
+
         singleCustomerGroup.setPosition(randomX, 0);
 
         order.setGroupActor(singleCustomerGroup);
@@ -285,6 +325,9 @@ public class GameScreen implements Screen {
         singleCustomerGroup.addActor(burgerStackGroup);
         singleCustomerGroup.addActor(timerActor);
         customerGroup.addActor(singleCustomerGroup);
+        for (Actor actor:customerGroup.getChildren()){
+            System.out.println("Actor position: "+actor.getX()+", "+actor.getY());
+        }
     }
 
     public VerticalGroup getPlayerBurgerGroup(List<Integer> burger){
@@ -381,6 +424,7 @@ public class GameScreen implements Screen {
         wrongBurgersTable.defaults().pad(5);
         for (Actor burgerGroup : cabinet.getChildren()) {
             wrongBurgersTable.add(getPlayerBurgerGroup(Arrays.asList(0, 2, 1))).prefSize(10).row();
+
 
         }
         ScrollPane wrongBurgersPane = new ScrollPane(wrongBurgersTable, skin);

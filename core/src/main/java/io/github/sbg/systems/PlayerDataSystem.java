@@ -23,7 +23,9 @@ public class PlayerDataSystem {
     private int day;
 
     public PlayerDataSystem(){
+
         Instance=this;
+
     }
 
     public int getDay() {
@@ -70,7 +72,7 @@ public class PlayerDataSystem {
         if (!unlockedIngredients.contains(id)){
             ingredientRarities.put(id,IngredientRarity.COMMON); // initially common
         }
-        unlockedIngredients.add(id);
+        unlockedIngredients.add(id); // because hashset won't duplicate value
     }
     public void upgradeIngredientRarity(int id) {
         IngredientRarity currentRarity=ingredientRarities.get(id);
@@ -92,10 +94,6 @@ public class PlayerDataSystem {
         //
 
         String data=json.prettyPrint(this);
-        System.out.println("==========");
-        System.out.println("Data Saved: ");
-        System.out.println(data);
-        System.out.println("==========");
         FileHandle file = Gdx.files.local("playerData.json");
         file.writeString(data, false);
     }
