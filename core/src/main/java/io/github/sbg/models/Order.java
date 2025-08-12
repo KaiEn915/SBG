@@ -1,37 +1,51 @@
 package io.github.sbg.models;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Group;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
+import io.github.sbg.systems.IngredientSystem;
+import io.github.sbg.systems.PlayerDataSystem;
+import io.github.sbg.ui.CircularTimer;
+
 public class Order {
     final private List<Integer> requiredIngredients;
-    private float remainingTime;
-    private String characterTexturePath;
+    private CircularTimer timer;
+    private Texture characterTexture;
+    private Group groupActor;
 
-    public Order(List<Integer> ingredients,String characterTexturePath) {
+    public Order(List<Integer> ingredients,Texture characterTexturePath) {
         requiredIngredients=ingredients;
-        this.characterTexturePath=characterTexturePath;
-        remainingTime=30f;
-        System.out.println("texture path: "+characterTexturePath);
-    }
-    public void update(float delta) {
-        remainingTime -= delta;
+        this.characterTexture=characterTexturePath;
     }
 
-    public boolean isExpired() {
-        return remainingTime <= 0;
+    public void setGroupActor(Group groupActor) {
+        this.groupActor = groupActor;
     }
+
+    public void setTimer(CircularTimer timer) {
+        this.timer = timer;
+    }
+
     public List<Integer> getRequiredIngredients() {
         return requiredIngredients;
     }
 
-    public String getCharacterTexturePath() {
-        return characterTexturePath;
+    public Texture getCharacterTexture() {
+        return characterTexture;
     }
 
-    public float getRemainingTime() {
-        return remainingTime;
+    public CircularTimer getTimer() {
+        return timer;
+    }
+
+    public Group getGroupActor() {
+        return groupActor;
     }
 
     public boolean matches(List<Integer> playerBurger) {
@@ -42,6 +56,15 @@ public class Order {
             }
         }
         return true;
+    }
+    public float calcRewardPoints(){
+        float total=0;
+        for (int ingredientID:requiredIngredients){
+            Ingredient ingredient=IngredientSystem.getIngredient(ingredientID);
+            IngredientRarity rarity=PlayerDataSystem.Instance.getIngredientRarity(ingredientID);
+            total+=ingredient.getValueBasedOnRarity(rarity);
+        }
+        return total;
     }
 }
 

@@ -1,5 +1,6 @@
 package io.github.sbg.models;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 
 public class Ingredient {
@@ -31,4 +32,9 @@ public class Ingredient {
     public Texture getTexture() {
         return texture;
     }
+
+    public float getValueBasedOnRarity(IngredientRarity rarity) {
+        return baseValue * rarity.getMultiplier();
+    }
+
 }

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class IngredientSystem {
-    private final Map<Integer, Ingredient> ingredients = new HashMap<>();
+    private final static Map<Integer, Ingredient> ingredients = new HashMap<>();
     private final AssetManager assetManager;
 
 
@@ -21,9 +21,11 @@ public class IngredientSystem {
     }
 
     private void loadIngredients() {
-        addIngredient(0, "Bun Bottom", 5, "ui/missingTexture.png");
-        addIngredient(1, "Bun Top", 5, "ui/missingTexture.png");
-        addIngredient(2, "Tomato", 10, "ui/missingTexture.png");
+        addIngredient(0, "Bun Bottom", 5, "ingredients/bunBottom.png");
+        addIngredient(1, "Bun Top", 5, "ingredients/bunTop.png");
+        addIngredient(2, "Beef", 10, "ingredients/beef.png");
+        addIngredient(3, "Chicken", 10, "ingredients/chicken.png");
+        addIngredient(4, "Fish", 10, "ingredients/fish.png");
     }
 
     private void addIngredient(int id, String name, float baseValue, String texturePath) {
@@ -36,7 +38,7 @@ public class IngredientSystem {
         ingredients.put(id, ingredient);
     }
 
-    public Ingredient getIngredient(int id) {
+    public static Ingredient getIngredient(int id) {
         return ingredients.get(id);
     }
 
