@@ -21,10 +21,10 @@ public class IngredientSystem {
     }
 
     private void loadIngredients() {
-        addIngredient(0, "Bun Bottom", 5, "ingredients/egg.png");
-        addIngredient(1, "Bun Top", 5, "ingredients/cheese.png");
-        addIngredient(2, "Beef", 10, "ingredients/friedEggs.png");
-        addIngredient(3, "Chicken", 10, "ingredients/friedEggs.png");
+        addIngredient(0, "Bun Bottom", 5, "ingredients/bunButtom.png");
+        addIngredient(1, "Bun Top", 5, "ingredients/bunTop.png");
+        addIngredient(2, "Beef", 10, "ingredients/beef.png");
+        addIngredient(3, "Chicken", 10, "ingredients/chicken.png");
         addIngredient(4, "Fish", 10, "ingredients/fish.png");
     }
 
