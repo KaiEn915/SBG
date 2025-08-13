@@ -50,5 +50,9 @@ public enum IngredientRarity {
                 return Color.WHITE;
         }
     }
+
+    public static IngredientRarity getMaxRarity(){
+        return IngredientRarity.LEGENDARY;
+    }
 }
 

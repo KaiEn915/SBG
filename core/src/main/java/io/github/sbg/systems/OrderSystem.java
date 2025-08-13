@@ -22,13 +22,13 @@ public class OrderSystem {
     private final GameScreen gameScreen;
     private List<Order> pendingOrders = new ArrayList<>();
     private List<Texture> characterTextures = new ArrayList<>();
-    private float orderInterval = 2, nextOrder = 2;
+    private float orderInterval = 10, nextOrder = 2;
     private final int MAXIMUM_ORDER_AMOUNT = 5;
     private List<Integer> playerBurger = new ArrayList<>();
     private ShapeRenderer shapeRenderer; // Add a ShapeRenderer instance
 
-    public OrderSystem(PlayerDataSystem playerDataSystem, GameScreen gameScreen, ShapeRenderer shapeRenderer) {
-        this.playerDataSystem = playerDataSystem;
+    public OrderSystem(GameScreen gameScreen, ShapeRenderer shapeRenderer) {
+        playerDataSystem = PlayerDataSystem.Instance;
         this.gameScreen = gameScreen;
         this.shapeRenderer = shapeRenderer; // Initialize ShapeRenderer
         loadCharacterTextures();

@@ -61,19 +61,30 @@ public class CircularTimer extends Actor {
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.setTransformMatrix(batch.getTransformMatrix());
 
-        // Apply the Actor's position and scale
         float x = getX();
         float y = getY();
         float currentRadius = radius * getScaleX();
-        shapeRenderer.setColor(Color.GREEN);
+        float centerX = x + currentRadius;
+        float centerY = y + currentRadius;
+
+        // Draw the full circle background in gray
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        shapeRenderer.circle(x + currentRadius, y + currentRadius, currentRadius);
-
         shapeRenderer.setColor(Color.GRAY);
+        shapeRenderer.circle(centerX, centerY, currentRadius);
+        shapeRenderer.end();
+
+        // Draw the filled arc for the time left in green
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.GREEN);
         float percentage = timeLeft / duration;
         float angle = 360 * percentage;
-        shapeRenderer.arc(x + currentRadius, y + currentRadius, currentRadius, 90, -angle);
+        shapeRenderer.arc(centerX, centerY, currentRadius, 90, -angle);
+        shapeRenderer.end();
+
+        // Draw the outline in black to make the timer pop
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.circle(centerX, centerY, currentRadius);
         shapeRenderer.end();
 
         batch.begin(); // Resume the SpriteBatch

@@ -7,13 +7,15 @@ public class Ingredient {
     private int id;
     private String name;
     private float baseValue;
+    private float baseUpgradeCost;
     private Texture texture;
 
 
-    public Ingredient(int id, String name, float baseValue, Texture texture) {
+    public Ingredient(int id, String name, float baseValue, float baseUpgradeCost, Texture texture) {
         this.id=id;
         this.name = name;
         this.baseValue = baseValue;
+        this.baseUpgradeCost=baseUpgradeCost;
         this.texture=texture;
     }
 
@@ -31,6 +33,10 @@ public class Ingredient {
 
     public Texture getTexture() {
         return texture;
+    }
+
+    public float getUpgradeCost(IngredientRarity currentRarity) {
+        return baseUpgradeCost*currentRarity.getMultiplier();
     }
 
     public float getValueBasedOnRarity(IngredientRarity rarity) {

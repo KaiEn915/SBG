@@ -22,11 +22,6 @@ public class PlayerDataSystem {
     private float highestScore;
     private int day;
 
-    public PlayerDataSystem(){
-
-        Instance=this;
-
-    }
 
     public int getDay() {
         return day;
@@ -37,6 +32,13 @@ public class PlayerDataSystem {
         System.out.println("Rarity for id: "+ingredientID+" is "+rarity);
         return rarity;
     }
+    public boolean isIngredientUnlocked(int ingredientID){
+        return unlockedIngredients.contains(ingredientID);
+    }
+    public boolean isIngredientMaxed(int ingredientID){
+        return ingredientRarities.get(ingredientID)==IngredientRarity.getMaxRarity();
+    }
+
 
     public float getHighestScore() {
         return highestScore;
@@ -50,8 +52,11 @@ public class PlayerDataSystem {
         return unlockedIngredients;
     }
 
-    public void addGamePoints(float gamePoints){
-        this.gamePoints+=gamePoints;
+    public void addGamePoints(float amount){
+        this.gamePoints+=amount;
+    }
+    public void removeGamePoints(float amount){
+        this.gamePoints-=amount;
     }
     public float getGamePoints() {
         return gamePoints;
@@ -74,7 +79,7 @@ public class PlayerDataSystem {
         }
         unlockedIngredients.add(id); // because hashset won't duplicate value
     }
-    public void upgradeIngredientRarity(int id) {
+    public void upgradeIngredient(int id) {
         IngredientRarity currentRarity=ingredientRarities.get(id);
         if (currentRarity!=null){
             ingredientRarities.put(id,currentRarity.next());

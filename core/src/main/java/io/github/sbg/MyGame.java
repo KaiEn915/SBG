@@ -38,8 +38,8 @@ public class MyGame extends Game {
 
         // load and initialize systems
         ingredientSystem=new IngredientSystem(assetManager);
-        playerDataSystem=new PlayerDataSystem();
-        playerDataSystem.loadData();
+        PlayerDataSystem.Instance=new PlayerDataSystem();
+        PlayerDataSystem.Instance.loadData();
 
         this.setScreen(new MainMenuScreen(this));
     }
