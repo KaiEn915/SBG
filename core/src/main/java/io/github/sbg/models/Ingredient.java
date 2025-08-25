@@ -27,6 +27,10 @@ public class Ingredient {
         return name;
     }
 
+    public float getBaseUpgradeCost() {
+        return baseUpgradeCost;
+    }
+
     public float getBaseValue() {
         return baseValue;
     }
@@ -35,11 +39,31 @@ public class Ingredient {
         return texture;
     }
 
-    public float getUpgradeCost(IngredientRarity currentRarity) {
+    public void setBaseUpgradeCost(float baseUpgradeCost) {
+        this.baseUpgradeCost = baseUpgradeCost;
+    }
+
+    public void setBaseValue(float baseValue) {
+        this.baseValue = baseValue;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
+
+    public float calcUpgradeCost(IngredientRarity currentRarity) {
         return baseUpgradeCost*currentRarity.getMultiplier();
     }
 
-    public float getValueBasedOnRarity(IngredientRarity rarity) {
+    public float calcValueBasedOnRarity(IngredientRarity rarity) {
         return baseValue * rarity.getMultiplier();
     }
 

@@ -33,7 +33,7 @@ public class OrderSystem {
         this.gameScreen = gameScreen;
         this.shapeRenderer = shapeRenderer; // Initialize ShapeRenderer
 
-        orderInterval=MathUtils.clamp(10-((playerDataSystem.getDay()-1)/2f),3,10);
+        orderInterval=MathUtils.clamp(10-((playerDataSystem.getDay()-1)/2f),4,10);
 
         loadCharacterTextures();
     }
@@ -78,7 +78,7 @@ public class OrderSystem {
             .toList();
 
         // layers amount to generate
-        int dayDifficulty= MathUtils.clamp(MathUtils.ceil(PlayerDataSystem.Instance.getDay()/2f),1,10);
+        int dayDifficulty= MathUtils.clamp(MathUtils.ceil(PlayerDataSystem.Instance.getDay()/2f),1,8);
         int layers = random.nextInt(1+dayDifficulty);
         for (int i = 0; i < layers && !unlockedIngredients.isEmpty(); i++) {
             // random.nextInt() index not start from 2 because id 0, 1 (bun top, bottom) is already filtered

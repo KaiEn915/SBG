@@ -24,13 +24,7 @@ public class Order {
         this.characterTexture=characterTexturePath;
     }
 
-    public void setGroupActor(Group groupActor) {
-        this.groupActor = groupActor;
-    }
 
-    public void setTimer(CircularTimer timer) {
-        this.timer = timer;
-    }
 
     public List<Integer> getRequiredIngredients() {
         return requiredIngredients;
@@ -48,6 +42,17 @@ public class Order {
         return groupActor;
     }
 
+    public void setCharacterTexture(Texture characterTexture) {
+        this.characterTexture = characterTexture;
+    }
+
+    public void setGroupActor(Group groupActor) {
+        this.groupActor = groupActor;
+    }
+
+    public void setTimer(CircularTimer timer) {
+        this.timer = timer;
+    }
     public boolean matches(List<Integer> playerBurger) {
         if (playerBurger.size() != requiredIngredients.size()) return false;
         for (int i = 0; i < requiredIngredients.size(); i++) {
@@ -62,7 +67,7 @@ public class Order {
         for (int ingredientID:requiredIngredients){
             Ingredient ingredient=IngredientSystem.getIngredient(ingredientID);
             IngredientRarity rarity=PlayerDataSystem.Instance.getIngredientRarity(ingredientID);
-            total+=ingredient.getValueBasedOnRarity(rarity);
+            total+=ingredient.calcValueBasedOnRarity(rarity);
         }
         return total;
     }

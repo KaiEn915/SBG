@@ -99,6 +99,9 @@ public class GameScreen implements Screen {
         setupBurgerActors(); // New method to create and configure the actors once
         updateUIForState();
     }
+    public Group getCustomerGroup() {
+        return customerGroup;
+    }
 
     public Image loadBackground() {
         Texture backgroundTexture = game.assetManager.get("ui/background.png", Texture.class);
@@ -138,36 +141,6 @@ public class GameScreen implements Screen {
         mainUiTable.add(ingredientTableContainer).expandX().fillX();
         rootStack.add(mainUiTable.bottom());
     }
-
-    // NEW METHOD: Create the actors once so listeners are only set up one time
-    private void setupBurgerActors() {
-        playerBurgerGroup = new VerticalGroup();
-        playerBurgerGroup.space(-120);
-
-        playerBurgerPane = new ScrollPane(playerBurgerGroup, skin);
-        playerBurgerPane.setScrollingDisabled(true, false);
-
-        clearButton = new TextButton("Clear", skin);
-        clearButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                orderSystem.clearPlayerBurger();
-            }
-        });
-
-        startButton = new TextButton("Start", skin);
-        startButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                isGameStarted = true;
-                timer = 60;
-                pointsEarned = 0;
-                score = 0;
-                updateUIForState();
-            }
-        });
-    }
-
     // CHANGED: This method no longer adds state-specific actors.
     // It only sets up the core structural tables.
     public void loadCenterTable() {
@@ -185,35 +158,6 @@ public class GameScreen implements Screen {
         centerTable.add(burgerTable).expandX().fillX().colspan(3);
         centerTable.add(cabinetPane).fillX().prefWidth(300).colspan(1);
     }
-
-    // REFACTORED: Now clears and adds actors directly based on game state.
-    private void updateUIForState() {
-        // Clear all current actors from the dynamic containers
-        burgerTable.clearChildren();
-        customerGroup.clearChildren();
-
-        boolean isPrepareStage = !isGameStarted;
-
-        if (isPrepareStage) {
-            // Prepare stage: show start button and unlock ingredients
-            burgerTable.add(startButton).center().expand().row();
-            ingredientTable = loadIngredientTable(true);
-            customerGroup.setVisible(false); // No customers in prepare stage
-        } else {
-            // Game stage: show burger and clear button
-            burgerTable.add(playerBurgerPane).width(300).padTop(10).padBottom(10).expandY().fillY().maxHeight(200);
-            burgerTable.add(clearButton).center().padRight(100);
-
-            ingredientTable = loadIngredientTable(false);
-            customerGroup.setVisible(true); // Customers are visible during gameplay
-        }
-
-        ingredientTableContainer.setActor(ingredientTable);
-
-        // Force the layout to update after adding/removing actors
-        mainUiTable.invalidate();
-    }
-
     public Table loadIngredientTable(boolean isPrepareStage) {
         Table newIngredientTable = new Table();
         int columns = 8;
@@ -254,7 +198,7 @@ public class GameScreen implements Screen {
             stackedGroup.addActor(ingredientGroup);
 
             if (isPrepareStage) {
-                float cost = ingredient.getUpgradeCost(rarity);
+                float cost = ingredient.calcUpgradeCost(rarity);
                 boolean isMaxed = playerData.isIngredientMaxed(ingredientID);
                 boolean isUnlocked = playerData.isIngredientUnlocked(ingredientID);
 
@@ -299,6 +243,40 @@ public class GameScreen implements Screen {
         return newIngredientTable;
     }
 
+    // NEW METHOD: Create the actors once so listeners are only set up one time
+    private void setupBurgerActors() {
+        playerBurgerGroup = new VerticalGroup();
+        playerBurgerGroup.space(-120);
+
+        playerBurgerPane = new ScrollPane(playerBurgerGroup, skin);
+        playerBurgerPane.setScrollingDisabled(true, false);
+
+        clearButton = new TextButton("Clear", skin);
+        clearButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                orderSystem.clearPlayerBurger();
+            }
+        });
+
+        startButton = new TextButton("Start", skin);
+        startButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                isGameStarted = true;
+                timer = 60;
+                pointsEarned = 0;
+                score = 0;
+                updateUIForState();
+            }
+        });
+    }
+
+
+
+    // REFACTORED: Now clears and adds actors directly based on game state.
+
+
     public void addPointsEarned(float point) {
         pointsEarned += point;
     }
@@ -318,6 +296,32 @@ public class GameScreen implements Screen {
         }
         playerBurgerGroup.invalidate();
         playerBurgerPane.scrollTo(0, playerBurgerGroup.getHeight(), 0, 0);
+    }
+    private void updateUIForState() {
+        // Clear all current actors from the dynamic containers
+        burgerTable.clearChildren();
+        customerGroup.clearChildren();
+
+        boolean isPrepareStage = !isGameStarted;
+
+        if (isPrepareStage) {
+            // Prepare stage: show start button and unlock ingredients
+            burgerTable.add(startButton).center().expand().row();
+            ingredientTable = loadIngredientTable(true);
+            customerGroup.setVisible(false); // No customers in prepare stage
+        } else {
+            // Game stage: show burger and clear button
+            burgerTable.add(playerBurgerPane).width(300).padTop(10).padBottom(10).expandY().fillY().maxHeight(200);
+            burgerTable.add(clearButton).center().padRight(100);
+
+            ingredientTable = loadIngredientTable(false);
+            customerGroup.setVisible(true); // Customers are visible during gameplay
+        }
+
+        ingredientTableContainer.setActor(ingredientTable);
+
+        // Force the layout to update after adding/removing actors
+        mainUiTable.invalidate();
     }
 
     public void spawnCustomer(Order order) {
@@ -410,9 +414,7 @@ public class GameScreen implements Screen {
         return burgerStackGroup;
     }
 
-    public Group getCustomerGroup() {
-        return customerGroup;
-    }
+
 
     public void addScore(float score) {
         this.score += score;
