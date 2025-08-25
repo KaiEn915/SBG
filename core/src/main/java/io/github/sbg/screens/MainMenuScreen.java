@@ -37,12 +37,10 @@ public class MainMenuScreen extends ScreenAdapter {
 
         // Buttons
         TextButton playButton = new TextButton("Game", skin);
-        TextButton settingsButton = new TextButton("Settings", skin);
         TextButton quitButton = new TextButton("Quit", skin);
 
         table.add(playButton).fillX().uniformX().uniformY().pad(10).width(400).height(100);
         table.row();
-        table.add(settingsButton).fillX().fillY().uniformX().uniformY().pad(10);
         table.row();
         table.add(quitButton).fillX().fillY().uniformX().uniformY().pad(10);
 
@@ -55,13 +53,6 @@ public class MainMenuScreen extends ScreenAdapter {
             return false;
         });
 
-        settingsButton.addListener(event -> {
-            if (event.toString().equals("touchDown")) {
-                System.out.println("Go to Settings!");
-                // game.setScreen(new SettingsScreen(game));
-            }
-            return false;
-        });
 
         quitButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
