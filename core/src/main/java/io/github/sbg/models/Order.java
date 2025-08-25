@@ -19,9 +19,9 @@ public class Order {
     private Texture characterTexture;
     private Group groupActor;
 
-    public Order(List<Integer> ingredients,Texture characterTexturePath) {
+    public Order(List<Integer> ingredients,Texture characterTexture) {
         requiredIngredients=ingredients;
-        this.characterTexture=characterTexturePath;
+        this.characterTexture=characterTexture;
     }
 
 
