@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Json;
 
 import java.util.*;
@@ -22,7 +23,7 @@ public class OrderSystem {
     private final GameScreen gameScreen;
     private List<Order> pendingOrders = new ArrayList<>();
     private List<Texture> characterTextures = new ArrayList<>();
-    private float orderInterval = 10, nextOrder = 2;
+    private float orderInterval = 1, nextOrder = 2;
     private final int MAXIMUM_ORDER_AMOUNT = 5;
     private List<Integer> playerBurger = new ArrayList<>();
     private ShapeRenderer shapeRenderer; // Add a ShapeRenderer instance
@@ -31,6 +32,9 @@ public class OrderSystem {
         playerDataSystem = PlayerDataSystem.Instance;
         this.gameScreen = gameScreen;
         this.shapeRenderer = shapeRenderer; // Initialize ShapeRenderer
+
+        orderInterval=MathUtils.clamp(10-((playerDataSystem.getDay()-1)/2f),3,10);
+
         loadCharacterTextures();
     }
     public void update(float delta) {
@@ -74,7 +78,8 @@ public class OrderSystem {
             .toList();
 
         // layers amount to generate
-        int layers = 2 + random.nextInt(4);
+        int dayDifficulty= MathUtils.clamp(MathUtils.ceil(PlayerDataSystem.Instance.getDay()/2f),1,10);
+        int layers = random.nextInt(1+dayDifficulty);
         for (int i = 0; i < layers && !unlockedIngredients.isEmpty(); i++) {
             // random.nextInt() index not start from 2 because id 0, 1 (bun top, bottom) is already filtered
             orderIngredients.add(unlockedIngredients.get(random.nextInt(unlockedIngredients.size())));
@@ -108,6 +113,9 @@ public class OrderSystem {
     }
 
     public void submitPlayerBurgerTo(Order order){
+        if (playerBurger.isEmpty())
+            return;
+
         boolean isBurgerMatch= order.matches(playerBurger);
         if (isBurgerMatch){
             orderSuccess(order);
@@ -122,15 +130,16 @@ public class OrderSystem {
         System.out.println("Order success!");
 
         float percentage=order.getTimer().getTimeLeft()/order.getTimer().getDuration();
-
-        // add score
-        float scores=100*percentage;
-        gameScreen.addScore(scores);
-
         // add game points
         float rewardPoints=order.calcRewardPoints();
         PlayerDataSystem.Instance.addGamePoints(rewardPoints);
         gameScreen.addPointsEarned(rewardPoints);
+
+        // add scores
+        float scores=100*rewardPoints*percentage;
+        gameScreen.addScore(scores);
+
+
 
         abort(order);
 

@@ -23,19 +23,19 @@ public class IngredientSystem {
     }
 
     private void loadIngredients() {
-        addIngredient(0, "Bun Bottom", 5,50, "ingredients/bunBottom.png");
-        addIngredient(1, "Bun Top", 5,50, "ingredients/bunTop.png");
-        addIngredient(2, "Baked Potato", 10,100, "ingredients/bakedPotato.png");
-        addIngredient(3, "Beef", 10,100, "ingredients/beef.png");
-        addIngredient(4, "Chicken", 10,100, "ingredients/chicken.png");
-        addIngredient(5, "Cooked Cod", 10,100, "ingredients/cookedCod.png");
-        addIngredient(6, "Cooked Mutton", 10,100, "ingredients/cookedMutton.png");
-        addIngredient(7, "Cooked Porkchop", 10,100, "ingredients/cookedPorkchop.png");
-        addIngredient(8, "Cooked Rabbit", 10,100, "ingredients/cookedRabbit.png");
-        addIngredient(9, "Cooked Salmon", 10,100, "ingredients/cookedSalmon.png");
-        addIngredient(10, "Fried Eggs", 10,150, "ingredients/friedEggs.png");
-        addIngredient(11, "Golden Apple", 10,300, "ingredients/goldenApple.png");
-        addIngredient(12, "Pumpkin Pie", 10,200, "ingredients/pumpkinPie.png");
+        addIngredient(0, "Bun Bottom", 1,50, "ingredients/bunBottom.png");
+        addIngredient(1, "Bun Top", 1,50, "ingredients/bunTop.png");
+        addIngredient(2, "Baked Potato", 2,100, "ingredients/bakedPotato.png");
+        addIngredient(3, "Beef", 3,150, "ingredients/beef.png");
+        addIngredient(4, "Chicken", 3,150, "ingredients/chicken.png");
+        addIngredient(5, "Cooked Cod", 3,150, "ingredients/cookedCod.png");
+        addIngredient(6, "Cooked Mutton", 3,150, "ingredients/cookedMutton.png");
+        addIngredient(7, "Cooked Porkchop", 3,150, "ingredients/cookedPorkchop.png");
+        addIngredient(8, "Cooked Rabbit", 3,150, "ingredients/cookedRabbit.png");
+        addIngredient(9, "Cooked Salmon", 3,150, "ingredients/cookedSalmon.png");
+        addIngredient(10, "Fried Eggs", 5,250, "ingredients/friedEggs.png");
+        addIngredient(11, "Golden Apple", 20,1000, "ingredients/goldenApple.png");
+        addIngredient(12, "Pumpkin Pie", 10,500, "ingredients/pumpkinPie.png");
     }
 
     private void addIngredient(int id, String name, float baseValue, float baseUpgradeCost,String texturePath) {

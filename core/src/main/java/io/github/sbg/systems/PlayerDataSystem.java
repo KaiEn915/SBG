@@ -32,6 +32,8 @@ public class PlayerDataSystem {
         System.out.println("Rarity for id: "+ingredientID+" is "+rarity);
         return rarity;
     }
+
+
     public boolean isIngredientUnlocked(int ingredientID){
         return unlockedIngredients.contains(ingredientID);
     }
@@ -133,7 +135,7 @@ public class PlayerDataSystem {
         unlockIngredient(0);
         unlockIngredient(1);
         unlockIngredient(2);
-        gamePoints=1f;
+        gamePoints=100f;
         saveData();
     }
 }

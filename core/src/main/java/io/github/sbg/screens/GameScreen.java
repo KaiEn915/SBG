@@ -57,7 +57,7 @@ public class GameScreen implements Screen {
     private float score;
     private float pointsEarned;
     private Label timerLabel;
-    private float timer = 90;
+    private float timer;
 
     private Table topBar;
     private Table mainUiTable;
@@ -109,7 +109,13 @@ public class GameScreen implements Screen {
 
     public void loadTopBar() {
         topBar = new Table();
-        TextButton pauseButton = new TextButton("Pause", skin);
+        TextButton pauseButton = new TextButton("Exit", skin);
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
         topBar.add(pauseButton).left().expandX().pad(10);
         timerLabel = new Label("Time Left: X", skin);
         topBar.add(timerLabel).center().expandX().pad(10);
@@ -154,7 +160,7 @@ public class GameScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 isGameStarted = true;
-                timer = 90;
+                timer = 60;
                 pointsEarned = 0;
                 score = 0;
                 updateUIForState();
@@ -223,7 +229,7 @@ public class GameScreen implements Screen {
             IngredientRarity rarity = playerData.getIngredientRarity(ingredientID);
 
             Group ingredientGroup = new Group();
-            float groupWidth = 225;
+            float groupWidth = 235;
             float groupHeight = 125;
             float imageSize = groupHeight / 3;
 
@@ -253,7 +259,7 @@ public class GameScreen implements Screen {
                 boolean isUnlocked = playerData.isIngredientUnlocked(ingredientID);
 
                 TextButton button = new TextButton("", skin);
-                button.setText(isMaxed ? "Maxed" : isUnlocked ? "Upgrade" : "Unlock");
+                button.setText(isMaxed ? "Maxed" : (isUnlocked ? "Upgrade " : "Unlock ")+"$"+(int)cost);
                 button.setDisabled(isMaxed || playerData.getGamePoints() < cost);
 
                 Container<TextButton> buttonContainer = new Container<>(button);
@@ -330,7 +336,7 @@ public class GameScreen implements Screen {
             randomX = minX + random.nextFloat() * (maxX - minX);
             validPosition = true;
             for (float x : existingSpawnX) {
-                if (Math.abs(randomX - x) < 100f) {
+                if (Math.abs(randomX - x) < 200f) {
                     validPosition = false;
                     break;
                 }
@@ -467,18 +473,15 @@ public class GameScreen implements Screen {
         Label moneyLabel = new Label("Total Points Earned: " + (int) pointsEarned, skin);
         Label scoreLabel = new Label("Score This Day: " + (int) score, skin);
 
-        Table wrongBurgersTable = new Table();
-        wrongBurgersTable.defaults().pad(5);
+        HorizontalGroup wrongBurgersGroup = new HorizontalGroup();
+        wrongBurgersGroup.space(50);
         SnapshotArray<Actor> actors = cabinet.getChildren();
-        for (Actor actor : actors) {
-            if (actor instanceof VerticalGroup) {
-                wrongBurgersTable.add(actor).size(100, 150).row();
-            }
+        for (int i = actors.size - 1; i >= 0; i--) {
+            Actor actor = actors.get(i);
+            wrongBurgersGroup.addActor(actor);
         }
-
-        ScrollPane wrongBurgersPane = new ScrollPane(wrongBurgersTable, skin);
-        wrongBurgersPane.setFadeScrollBars(false);
-        wrongBurgersPane.setScrollingDisabled(false, false);
+        ScrollPane wrongBurgersPane=new ScrollPane(wrongBurgersGroup,skin);
+        wrongBurgersPane.setScrollingDisabled(false,true);
         Label wrongLabel = new Label("Incorrect Burgers, they are now being donated to people who need it!", skin);
 
         TextButton backButton = new TextButton("Proceed to Next Day", skin);
@@ -495,7 +498,7 @@ public class GameScreen implements Screen {
         gameOverWindow.add(scoreLabel).left().padBottom(5).row();
         gameOverWindow.add(highestPointLabel).left().padBottom(20).row();
         gameOverWindow.add(wrongLabel).left().row();
-        gameOverWindow.add(wrongBurgersPane).size(300, 200).row();
+        gameOverWindow.add(wrongBurgersPane).expandX().fillX().row();
         gameOverWindow.add(backButton).padTop(20).center();
 
         gameOverWindow.pack();
