@@ -21,7 +21,7 @@ public class MyGame extends Game {
     @Override
     public void create() {
         skin=new Skin(Gdx.files.internal("craftacular-ui.json"));
-
+        Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 
         // loading asset manager
         assetManager = new AssetManager();

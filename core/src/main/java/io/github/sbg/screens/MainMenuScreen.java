@@ -35,14 +35,20 @@ public class MainMenuScreen extends ScreenAdapter {
         table.setBackground(backgroundDrawable);
         stage.addActor(table);
 
+        // Label
+        Label titleLable=new Label("SUSTAINABLE BURGER GAME",skin,"title");
+
         // Buttons
         TextButton playButton = new TextButton("Game", skin);
         TextButton quitButton = new TextButton("Quit", skin);
 
-        table.add(playButton).fillX().uniformX().uniformY().pad(10).width(400).height(100);
+        table.add(titleLable).fillX();
         table.row();
         table.row();
-        table.add(quitButton).fillX().fillY().uniformX().uniformY().pad(10);
+        table.add(playButton).uniformY().pad(10).width(400).height(100);
+        table.row();
+        table.row();
+        table.add(quitButton).uniformY().pad(10).width(400).height(100);
 
         // Listeners
         playButton.addListener(event -> {
